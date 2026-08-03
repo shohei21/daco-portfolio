@@ -1,0 +1,11 @@
+# 元素材(サイトで使う加工済み画像は assets/img/ にあるため、原本は公開リポジトリに含めない)
+give/
+
+# OS / エディタ
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# 一時ファイル
+_preview/
+*.tmp
