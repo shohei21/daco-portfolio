@@ -3,6 +3,18 @@
 AIクリエイター DACO のポートフォリオサイト。
 Notionのポートフォリオページをもとに、企業・クライアント向けに見やすく再構成したシングルページサイトです。
 
+**公開URL:** https://shohei21.github.io/daco-portfolio/
+
+## 更新の反映方法
+
+ファイルを編集後、以下でGitHub Pagesに自動反映されます(反映まで1〜2分):
+
+```
+git add -A
+git commit -m "変更内容"
+git push
+```
+
 ## 構成
 
 ```
