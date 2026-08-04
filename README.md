@@ -30,7 +30,9 @@ give/               … 元素材(キャラシート原本・ロゴ原本)
 
 ## セクション
 
-Hero(チビキャラ配置) → 00 Profile / 01 About → ✦ Character(ブランドキャラ紹介+シート2枚) → 02 Selected Works(5作品) → 03/04 Production(できること) → 05 Strength → 06 Tools → 07 Workflow → 08 Available Work → 09 Contact
+Hero(MVP受賞バッジ+マスコット) → 01 Selected Works(5作品・実績を最優先) → ✦ Character(ブランドキャラ紹介+シート2枚) → 02 Profile / About → 03 Production(できること) → 04 Strength → 05 Tools → 06 Workflow → 07 Available Work → 08 Contact
+
+※「実績とクリエイティブを冒頭に」というアドバイスを受け、WorksとCharacterをProfileより前に配置。
 
 ## 確認方法
 
