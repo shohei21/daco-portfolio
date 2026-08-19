@@ -618,6 +618,63 @@ em { font-style: normal; }
 }
 .work__link:hover { opacity: 0.75; }
 
+/* 複数動画の切り替え */
+.work__media--videos { display: grid; gap: 12px; }
+.work__media--videos.work__media--vertical { justify-items: center; }
+.work__media--videos.work__media--vertical .yt,
+.work__media--videos.work__media--vertical .vidnav { width: min(100%, 320px); }
+
+.vidnav {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+.vidnav__item {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 0; border: 0; background: none;
+  cursor: pointer; text-align: left;
+  opacity: 0.55;
+  transition: opacity 0.25s, transform 0.25s;
+}
+.vidnav__thumb {
+  position: relative; display: block;
+  aspect-ratio: 16 / 10;
+  border-radius: 12px; overflow: hidden;
+  border: 1px solid var(--border);
+  background: #000;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.vidnav__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.vidnav__thumb::after {
+  content: "▶";
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-size: 0.8rem; color: #fff;
+  background: rgba(0, 0, 0, 0.32);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  transition: opacity 0.25s;
+}
+.vidnav__no {
+  position: absolute; top: 6px; left: 6px;
+  font-family: var(--font-en); font-weight: 700; font-size: 0.62rem;
+  line-height: 1; padding: 3px 6px; border-radius: 5px;
+  background: rgba(10, 14, 43, 0.85); color: #fff;
+}
+.vidnav__label {
+  font-size: 0.72rem; line-height: 1.4; color: var(--text-dim);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.vidnav__item:hover { opacity: 0.9; transform: translateY(-2px); }
+.vidnav__item.is-active { opacity: 1; }
+.vidnav__item.is-active .vidnav__thumb {
+  border-color: var(--c1);
+  box-shadow: 0 0 18px rgba(122, 60, 255, 0.4);
+}
+.vidnav__item.is-active .vidnav__thumb::after { opacity: 0; }
+.vidnav__item.is-active .vidnav__label { color: var(--text); font-weight: 500; }
+
 /* WORK04 ギャラリー */
 .work__media--gallery { display: grid; gap: 12px; }
 .gallery__main {

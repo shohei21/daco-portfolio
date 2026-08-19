@@ -28,33 +28,84 @@ const io = new IntersectionObserver(
   }),
   { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
 );
-document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+// 動的に追加した要素にも使えるよう公開
+window.DacoReveal = (root = document) => {
+  root.querySelectorAll('.reveal').forEach(el => io.observe(el));
+};
+window.DacoReveal();
 
 // ===== YouTube クリック再生（軽量ファサード）=====
-document.querySelectorAll('.yt').forEach(box => {
-  box.addEventListener('click', () => {
-    if (box.querySelector('iframe')) return;
-    const id = box.dataset.yt;
-    const iframe = document.createElement('iframe');
-    iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
-    iframe.title = box.dataset.title || 'YouTube video';
-    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-    iframe.allowFullscreen = true;
-    box.innerHTML = '';
-    box.appendChild(iframe);
+function bindYouTube(root = document) {
+  root.querySelectorAll('.yt').forEach(box => {
+    if (box.dataset.bound) return;
+    box.dataset.bound = '1';
+    box.addEventListener('click', () => {
+      if (box.querySelector('iframe')) return;
+      const id = box.dataset.yt;
+      if (!id) return;
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+      iframe.title = box.dataset.title || 'YouTube video';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      box.innerHTML = '';
+      box.appendChild(iframe);
+    });
   });
-});
+}
 
-// ===== WORK04 ギャラリー切り替え =====
-const galleryMain = document.getElementById('galleryMain');
-document.querySelectorAll('.gallery__thumb').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.gallery__thumb').forEach(b => b.classList.remove('is-active'));
-    btn.classList.add('is-active');
-    galleryMain.style.opacity = '0';
-    setTimeout(() => {
-      galleryMain.src = btn.dataset.src;
-      galleryMain.style.opacity = '1';
-    }, 180);
+// ===== 複数動画の切り替え（作品ごとに独立）=====
+function bindVideoNav(root = document) {
+  root.querySelectorAll('.work__media--videos').forEach(box => {
+    if (box.dataset.bound) return;
+    box.dataset.bound = '1';
+    const player = box.querySelector('.yt');
+    const items = box.querySelectorAll('.vidnav__item');
+    if (!player || !items.length) return;
+    const vertical = box.dataset.vertical === '1';
+    const workTitle = box.dataset.worktitle || '';
+    items.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.classList.contains('is-active') && !player.querySelector('iframe')) return;
+        const wasPlaying = !!player.querySelector('iframe');
+        items.forEach(b => b.classList.toggle('is-active', b === btn));
+        const v = { id: btn.dataset.yt, label: btn.dataset.label, thumb: btn.dataset.thumb };
+        player.dataset.yt = v.id;
+        player.dataset.title = v.label || workTitle;
+        player.innerHTML = window.DacoWorks.facade(v, workTitle, vertical);
+        // 再生中に切り替えたときは、そのまま次の動画を再生する
+        if (wasPlaying) player.click();
+      });
+    });
   });
-});
+}
+
+// ===== 画像ギャラリー切り替え（作品ごとに独立）=====
+function bindGallery(root = document) {
+  root.querySelectorAll('.work__media--gallery').forEach(box => {
+    if (box.dataset.bound) return;
+    box.dataset.bound = '1';
+    const main = box.querySelector('.gallery__main img');
+    const thumbs = box.querySelectorAll('.gallery__thumb');
+    if (!main || !thumbs.length) return;
+    thumbs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        thumbs.forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        main.style.opacity = '0';
+        setTimeout(() => {
+          main.src = btn.dataset.src;
+          main.style.opacity = '1';
+        }, 180);
+      });
+    });
+  });
+}
+
+// 動的描画後の再バインド用に公開
+window.DacoBind = (root = document) => {
+  bindYouTube(root);
+  bindVideoNav(root);
+  bindGallery(root);
+};
+window.DacoBind();
