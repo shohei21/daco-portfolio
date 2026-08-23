@@ -39,6 +39,8 @@ function bindYouTube(root = document) {
   root.querySelectorAll('.yt').forEach(box => {
     if (box.dataset.bound) return;
     box.dataset.bound = '1';
+    // 動画ファイル・画像はブラウザ標準の <video> / <img> なので何もしない
+    if (box.dataset.kind && box.dataset.kind !== 'youtube') return;
     box.addEventListener('click', () => {
       if (box.querySelector('iframe')) return;
       const id = box.dataset.yt;
@@ -54,27 +56,38 @@ function bindYouTube(root = document) {
   });
 }
 
-// ===== 複数動画の切り替え（作品ごとに独立）=====
+// ===== 複数メディアの切り替え（作品ごとに独立）=====
 function bindVideoNav(root = document) {
   root.querySelectorAll('.work__media--videos').forEach(box => {
     if (box.dataset.bound) return;
     box.dataset.bound = '1';
-    const player = box.querySelector('.yt');
     const items = box.querySelectorAll('.vidnav__item');
-    if (!player || !items.length) return;
+    if (!items.length) return;
     const vertical = box.dataset.vertical === '1';
     const workTitle = box.dataset.worktitle || '';
+    const article = box.closest('[data-work-id]');
+    const work = (window.DacoWorks.current() || []).find(
+      w => article && String(w.id) === article.dataset.workId
+    );
+    const media = work ? window.DacoWorks.mediaOf(work) : [];
+
     items.forEach(btn => {
       btn.addEventListener('click', () => {
-        if (btn.classList.contains('is-active') && !player.querySelector('iframe')) return;
+        const i = Number(btn.dataset.i);
+        const m = media[i];
+        if (!m) return;
+        const player = box.querySelector('.yt');
         const wasPlaying = !!player.querySelector('iframe');
+        if (btn.classList.contains('is-active') && !wasPlaying) return;
         items.forEach(b => b.classList.toggle('is-active', b === btn));
-        const v = { id: btn.dataset.yt, label: btn.dataset.label, thumb: btn.dataset.thumb };
-        player.dataset.yt = v.id;
-        player.dataset.title = v.label || workTitle;
-        player.innerHTML = window.DacoWorks.facade(v, workTitle, vertical);
-        // 再生中に切り替えたときは、そのまま次の動画を再生する
-        if (wasPlaying) player.click();
+
+        // プレイヤーごと差し替える（YouTube／動画ファイル／画像で中身が違うため）
+        player.outerHTML = window.DacoWorks.playerHTML(m, workTitle, vertical);
+        const next = box.querySelector('.yt');
+        window.DacoBind(box);
+        // YouTubeを再生中に切り替えたときは、そのまま次の動画を再生する
+        if (wasPlaying && next.dataset.kind === 'youtube') next.click();
+        if (next.dataset.kind === 'video' && wasPlaying) next.querySelector('video').play();
       });
     });
   });

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DACO｜AI CREATIVE PORTFOLIO</title>
-<meta name="description" content="生成AIを活用した画像制作・動画制作・キャラクター企画・音楽制作。SNS・広告・IP展開に使えるビジュアルと映像企画を制作するAIクリエイター DACO のポートフォリオ。">
+<title data-i18n="meta.title">DACO｜AI CREATIVE PORTFOLIO</title>
+<meta name="description" data-i18n="meta.desc" data-i18n-attr="content" content="生成AIを活用した画像制作・動画制作・キャラクター企画・音楽制作。SNS・広告・IP展開に使えるビジュアルと映像企画を制作するAIクリエイター DACO のポートフォリオ。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&family=Space+Grotesk:wght@300..700&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -31,7 +31,11 @@
     <a href="#workflow">Workflow</a>
     <a href="#contact" class="nav__cta">Contact</a>
   </nav>
-  <button class="nav__burger" id="navBurger" aria-label="メニュー">
+  <div class="langsw" id="langSwitch" role="group" aria-label="Language / 言語">
+    <button type="button" data-lang="ja">JA</button>
+    <button type="button" data-lang="en">EN</button>
+  </div>
+  <button class="nav__burger" id="navBurger" data-i18n="nav.menu" data-i18n-attr="aria-label" aria-label="メニュー">
     <span></span><span></span><span></span>
   </button>
 </header>
@@ -44,14 +48,14 @@
       <p class="hero__eyebrow reveal">AI CREATIVE PORTFOLIO</p>
       <a class="hero__award reveal" href="#works">
         <span class="hero__award-icon">🏆</span>
-        AI動画コンテスト <b>MVP受賞</b><span class="hero__award-work">—「超次元サッカー」</span>
+        <span data-i18n="hero.award">AI動画コンテスト <b>MVP受賞</b><span class="hero__award-work">—「超次元サッカー」</span></span>
       </a>
       <h1 class="hero__title">
-        <span class="reveal d1">創る楽しさを、</span>
-        <span class="reveal d2"><em class="grad-text">伝わるチカラ</em>に。</span>
+        <span class="reveal d1" data-i18n="hero.title1">創る楽しさを、</span>
+        <span class="reveal d2" data-i18n="hero.title2"><em class="grad-text">伝わるチカラ</em>に。</span>
       </h1>
       <p class="hero__name reveal d3">DACO<span>／ AI Creator</span></p>
-      <p class="hero__lead reveal d4">
+      <p class="hero__lead reveal d4" data-i18n="hero.lead">
         生成AIを活用して、SNS・広告・IP展開に使える<br class="pc-only">
         ビジュアルと映像企画を制作しています。
       </p>
@@ -59,8 +63,8 @@
         <span>AI IMAGE</span><span>AI VIDEO</span><span>CHARACTER DESIGN</span><span>AI MUSIC</span>
       </div>
       <div class="hero__actions reveal d6">
-        <a href="#works" class="btn btn--primary">作品を見る<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-        <a href="#contact" class="btn btn--ghost">お仕事のご相談</a>
+        <a href="#works" class="btn btn--primary"><span data-i18n="hero.btnWorks">作品を見る</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <a href="#contact" class="btn btn--ghost" data-i18n="hero.btnContact">お仕事のご相談</a>
       </div>
     </div>
     <div class="hero__mascot" aria-hidden="true"><img src="assets/img/daco_mascot.jpg" alt=""></div>
@@ -79,7 +83,7 @@
   <section class="section section--wide" id="works">
     <div class="section__head reveal">
       <span class="section__num">01</span>
-      <h2 class="section__title">Selected Works<span class="section__title-ja">制作実績</span></h2>
+      <h2 class="section__title">Selected Works<span class="section__title-ja" data-i18n="sec.works">制作実績</span></h2>
     </div>
 
     <!-- 作品カードは assets/data/works.js のデータから描画されます（編集モードで追加・編集） -->
@@ -90,22 +94,22 @@
   <section class="section" id="character">
     <div class="section__head reveal">
       <span class="section__num">✦</span>
-      <h2 class="section__title">Character<span class="section__title-ja">ブランドキャラクター</span></h2>
+      <h2 class="section__title">Character<span class="section__title-ja" data-i18n="sec.character">ブランドキャラクター</span></h2>
     </div>
     <div class="charsec">
       <div class="charsec__copy reveal">
-        <p class="charsec__concept">CREATE ・ PLAY ・ INSPIRE</p>
-        <p class="charsec__catch">創る・遊ぶ・魅せる。<br>インスピレーションを<br>カタチにする。</p>
-        <p class="charsec__desc">
+        <p class="charsec__concept" data-i18n="char.concept">CREATE ・ PLAY ・ INSPIRE</p>
+        <p class="charsec__catch" data-i18n="char.catch">創る・遊ぶ・魅せる。<br>インスピレーションを<br>カタチにする。</p>
+        <p class="charsec__desc" data-i18n="char.desc">
           SNSでの発信は、このオリジナルキャラクター「DACO」で活動しています。
           近未来のストリートカルチャーをベースに、ネオンカラーとデジタルの美学を融合させたスタイル。
           このサイトの配色も、キャラクターのブランドカラーで統一しています。
         </p>
-        <div class="charsec__keywords">
+        <div class="charsec__keywords" data-i18n="char.keywords">
           <span># ネオン</span><span># ストリート</span><span># フューチャー</span>
           <span># クリエイティブ</span><span># 自由</span><span># インスピレーション</span>
         </div>
-        <p class="charsec__note">
+        <p class="charsec__note" data-i18n="char.note">
           <b>キャラクターシートも自作です。</b><br>
           三面図・表情差分・カラーパレット・ディテール指定まで、
           このレベルの設定資料をAIで設計・制作できます(制作実例としてもご覧ください)。
@@ -113,11 +117,11 @@
       </div>
       <div class="charsec__sheets reveal d2">
         <a class="charsec__sheet" href="assets/img/character_sheet_full.jpg" target="_blank" rel="noopener">
-          <img src="assets/img/character_sheet_full.jpg" alt="DACO キャラクターシート(フルモデル)" loading="lazy">
+          <img src="assets/img/character_sheet_full.jpg" alt="DACO character sheet (full model)" loading="lazy">
           <span>FULL MODEL SHEET</span>
         </a>
         <a class="charsec__sheet" href="assets/img/character_sheet_chibi.jpg" target="_blank" rel="noopener">
-          <img src="assets/img/character_sheet_chibi.jpg" alt="DACO チビキャラモデルシート" loading="lazy">
+          <img src="assets/img/character_sheet_chibi.jpg" alt="DACO chibi model sheet" loading="lazy">
           <span>CHIBI MODEL SHEET</span>
         </a>
       </div>
@@ -128,20 +132,20 @@
   <section class="section" id="profile">
     <div class="section__head reveal">
       <span class="section__num">02</span>
-      <h2 class="section__title">Profile<span class="section__title-ja">プロフィール</span></h2>
+      <h2 class="section__title">Profile<span class="section__title-ja" data-i18n="sec.profile">プロフィール</span></h2>
     </div>
     <div class="profile">
       <div class="profile__card reveal">
-        <div class="profile__avatar" aria-hidden="true"><img src="assets/img/daco_mascot.jpg" alt="DACOキャラクター"></div>
+        <div class="profile__avatar" aria-hidden="true"><img src="assets/img/daco_mascot.jpg" alt="DACO"></div>
         <h3 class="profile__name">DACO</h3>
         <p class="profile__role">AI Creative / AI Video Planner / Prompt Designer</p>
-        <p class="profile__desc">
+        <p class="profile__desc" data-i18n="prof.desc">
           生成AIを活用した画像制作・動画制作・キャラクター企画・音楽制作を行っています。
           AIならではのスピード感と、世界観づくり・ストーリー設計を掛け合わせ、
           SNSやYouTubeで見せやすいクリエイティブを目指しています。
         </p>
         <dl class="profile__meta">
-          <div><dt>Main Field</dt><dd>AI画像生成／AI動画生成／キャラクター企画／動画構成</dd></div>
+          <div><dt>Main Field</dt><dd data-i18n="prof.field">AI画像生成／AI動画生成／キャラクター企画／動画構成</dd></div>
           <div><dt>Location</dt><dd>Japan</dd></div>
           <div><dt>Contact</dt><dd><a href="mailto:dacocreator21@gmail.com">dacocreator21@gmail.com</a></dd></div>
           <div><dt>X / SNS</dt><dd><a href="https://x.com/DACO_2026" target="_blank" rel="noopener">@DACO_2026</a></dd></div>
@@ -149,12 +153,12 @@
       </div>
       <div class="profile__about reveal d2">
         <span class="profile__about-num">ABOUT ME</span>
-        <blockquote class="profile__quote">“AIを楽しみながら、<br>新たな自分への挑戦”</blockquote>
-        <p>
+        <blockquote class="profile__quote" data-i18n="prof.quote">“AIを楽しみながら、<br>新たな自分への挑戦”</blockquote>
+        <p data-i18n="prof.p1">
           私は、AI画像・AI動画・音楽生成・ストーリー設計など、
           印象に残るクリエイティブを心がけつつ、新たな自分への挑戦中です。
         </p>
-        <p>
+        <p data-i18n="prof.p2">
           AIを触っているだけで、今はワクワクして、楽しい時間にはなりますが、
           それを新たな自分の可能性への挑戦に繋げたい。<strong>この想いで取り組んでいます！</strong>
         </p>
@@ -166,13 +170,13 @@
   <section class="section" id="services">
     <div class="section__head reveal">
       <span class="section__num">03</span>
-      <h2 class="section__title">Production<span class="section__title-ja">できること</span></h2>
+      <h2 class="section__title">Production<span class="section__title-ja" data-i18n="sec.production">できること</span></h2>
     </div>
 
     <div class="services">
       <div class="services__col reveal">
-        <h3 class="services__cat"><span class="services__icon">🎬</span>AI VIDEO PRODUCTION<small>AI動画制作でできること</small></h3>
-        <ul class="services__list">
+        <h3 class="services__cat"><span class="services__icon">🎬</span>AI VIDEO PRODUCTION<small data-i18n="svc.sub1">AI動画制作でできること</small></h3>
+        <ul class="services__list" data-i18n="svc.list1">
           <li><b>ショート動画</b>4秒〜60秒程度のSNS向け動画構成・作成・編集</li>
           <li><b>絵コンテ・字コンテ</b>秒数ごとの映像展開、カメラワーク、演出設計</li>
           <li><b>画像生成</b>動画化を前提にしたキャラクター・背景・小物制作・修正</li>
@@ -182,8 +186,8 @@
         </ul>
       </div>
       <div class="services__col reveal d2">
-        <h3 class="services__cat"><span class="services__icon">🎨</span>AI IMAGE PRODUCTION<small>AI画像制作でできること</small></h3>
-        <ul class="services__list">
+        <h3 class="services__cat"><span class="services__icon">🎨</span>AI IMAGE PRODUCTION<small data-i18n="svc.sub2">AI画像制作でできること</small></h3>
+        <ul class="services__list" data-i18n="svc.list2">
           <li><b>キャラクターデザイン</b>表情、衣装、ポーズ、キャラクターシート</li>
           <li><b>背景・世界観制作</b>学校、未来都市、ライブ会場、ファンタジー空間など</li>
           <li><b>ビジュアルシート</b>映像化・案件共有に使いやすい設定資料風の画像制作</li>
@@ -198,28 +202,28 @@
   <section class="section" id="strength">
     <div class="section__head reveal">
       <span class="section__num">04</span>
-      <h2 class="section__title">Strength<span class="section__title-ja">私の強み</span></h2>
+      <h2 class="section__title">Strength<span class="section__title-ja" data-i18n="sec.strength">私の強み</span></h2>
     </div>
     <div class="strengths">
       <div class="strength reveal">
         <span class="strength__num">01</span>
-        <h3>画像だけで終わらせず、<br>動画化まで考えた設計</h3>
-        <p>静止画としてきれいなだけでなく、その後の動画生成・編集・SNS投稿まで見据えて構図や演出を考えます。</p>
+        <h3 data-i18n="str.t1">画像だけで終わらせず、<br>動画化まで考えた設計</h3>
+        <p data-i18n="str.d1">静止画としてきれいなだけでなく、その後の動画生成・編集・SNS投稿まで見据えて構図や演出を考えます。</p>
       </div>
       <div class="strength reveal d2">
         <span class="strength__num">02</span>
-        <h3>キャラクターと世界観を<br>セットで作れる</h3>
-        <p>キャラクター単体ではなく、背景・物語・関係性・見せ場まで含めて、継続的に展開しやすいクリエイティブを設計します。</p>
+        <h3 data-i18n="str.t2">キャラクターと世界観を<br>セットで作れる</h3>
+        <p data-i18n="str.d2">キャラクター単体ではなく、背景・物語・関係性・見せ場まで含めて、継続的に展開しやすいクリエイティブを設計します。</p>
       </div>
       <div class="strength reveal d3">
         <span class="strength__num">03</span>
-        <h3>ショート動画向けの<br>“見せ場”を意識できる</h3>
-        <p>冒頭で引きつけるカット、途中の変化、最後の印象的な締めなど、短尺動画に必要な流れを意識して制作します。</p>
+        <h3 data-i18n="str.t3">ショート動画向けの<br>“見せ場”を意識できる</h3>
+        <p data-i18n="str.d3">冒頭で引きつけるカット、途中の変化、最後の印象的な締めなど、短尺動画に必要な流れを意識して制作します。</p>
       </div>
       <div class="strength reveal d4">
         <span class="strength__num">04</span>
-        <h3>プロンプト設計と<br>言語化が得意</h3>
-        <p>完成イメージを言葉に落とし込み、画像生成・動画生成・音楽生成に使いやすい形へ整理できます。</p>
+        <h3 data-i18n="str.t4">プロンプト設計と<br>言語化が得意</h3>
+        <p data-i18n="str.d4">完成イメージを言葉に落とし込み、画像生成・動画生成・音楽生成に使いやすい形へ整理できます。</p>
       </div>
     </div>
   </section>
@@ -228,7 +232,7 @@
   <section class="section" id="tools">
     <div class="section__head reveal">
       <span class="section__num">05</span>
-      <h2 class="section__title">Tools<span class="section__title-ja">使用ツール</span></h2>
+      <h2 class="section__title">Tools<span class="section__title-ja" data-i18n="sec.tools">使用ツール</span></h2>
     </div>
     <div class="tools reveal">
       <div class="tools__row"><span class="tools__cat">Text / Planning</span><div class="tools__chips"><span>ChatGPT</span><span>Claude</span></div></div>
@@ -244,33 +248,33 @@
   <section class="section" id="workflow">
     <div class="section__head reveal">
       <span class="section__num">06</span>
-      <h2 class="section__title">Workflow<span class="section__title-ja">制作の進め方</span></h2>
+      <h2 class="section__title">Workflow<span class="section__title-ja" data-i18n="sec.workflow">制作の進め方</span></h2>
     </div>
     <ol class="flow">
       <li class="flow__step reveal">
         <span class="flow__num">STEP 1</span>
-        <h3>目的整理</h3>
-        <p>何を伝える作品か、見ていただく相手について整理します。</p>
+        <h3 data-i18n="flow.t1">目的整理</h3>
+        <p data-i18n="flow.d1">何を伝える作品か、見ていただく相手について整理します。</p>
       </li>
       <li class="flow__step reveal d2">
         <span class="flow__num">STEP 2</span>
-        <h3>企画・構成作成</h3>
-        <p>世界観、ストーリー、見せ場、尺、カメラワークを設計します。</p>
+        <h3 data-i18n="flow.t2">企画・構成作成</h3>
+        <p data-i18n="flow.d2">世界観、ストーリー、見せ場、尺、カメラワークを設計します。</p>
       </li>
       <li class="flow__step reveal d3">
         <span class="flow__num">STEP 3</span>
-        <h3>ビジュアル制作</h3>
-        <p>キャラクター、背景、小物、サムネイル、キービジュアルを作成します。</p>
+        <h3 data-i18n="flow.t3">ビジュアル制作</h3>
+        <p data-i18n="flow.d3">キャラクター、背景、小物、サムネイル、キービジュアルを作成します。</p>
       </li>
       <li class="flow__step reveal d4">
         <span class="flow__num">STEP 4</span>
-        <h3>動画化・演出設計</h3>
-        <p>動き、カット割り、演出、SE、テロップ方針を整理します。</p>
+        <h3 data-i18n="flow.t4">動画化・演出設計</h3>
+        <p data-i18n="flow.d4">動き、カット割り、演出、SE、テロップ方針を整理します。</p>
       </li>
       <li class="flow__step reveal d5">
         <span class="flow__num">STEP 5</span>
-        <h3>改善・ブラッシュアップ</h3>
-        <p>見やすさ、伝わりやすさ、違和感を調整します。</p>
+        <h3 data-i18n="flow.t5">改善・ブラッシュアップ</h3>
+        <p data-i18n="flow.d5">見やすさ、伝わりやすさ、違和感を調整します。</p>
       </li>
     </ol>
   </section>
@@ -279,9 +283,9 @@
   <section class="section" id="available">
     <div class="section__head reveal">
       <span class="section__num">07</span>
-      <h2 class="section__title">Available Work<span class="section__title-ja">対応可能な業務</span></h2>
+      <h2 class="section__title">Available Work<span class="section__title-ja" data-i18n="sec.available">対応可能な業務</span></h2>
     </div>
-    <div class="avail reveal">
+    <div class="avail reveal" data-i18n="avail.list">
       <span>AI画像制作</span>
       <span>AI動画制作</span>
       <span>YouTube / TikTok / X向けショート動画構成</span>
@@ -299,32 +303,34 @@
       <img class="contact__mascot" src="assets/img/daco_mascot.jpg" alt="" aria-hidden="true">
       <span class="section__num section__num--center">08</span>
       <h2 class="contact__title">Let's <em class="grad-text">Create</em> Together</h2>
-      <p class="contact__lead">
+      <p class="contact__lead" data-i18n="contact.lead">
         ご相談・ご依頼など、お気軽にご連絡ください。<br>
         「こんなことできる？」の一言からでも大歓迎です！
       </p>
       <div class="contact__actions">
-        <a class="btn btn--primary btn--lg" href="mailto:dacocreator21@gmail.com">✉ メールで相談する</a>
-        <a class="btn btn--ghost btn--lg" href="https://x.com/DACO_2026" target="_blank" rel="noopener">𝕏 DMで相談する</a>
+        <a class="btn btn--primary btn--lg" href="mailto:dacocreator21@gmail.com" data-i18n="contact.btnMail">✉ メールで相談する</a>
+        <a class="btn btn--ghost btn--lg" href="https://x.com/DACO_2026" target="_blank" rel="noopener" data-i18n="contact.btnX">𝕏 DMで相談する</a>
       </div>
       <dl class="contact__meta">
-        <div><dt>Name</dt><dd>DACO（WATANABE SHOHEI）</dd></div>
+        <div><dt>Name</dt><dd>DACO</dd></div>
         <div><dt>Email</dt><dd><a href="mailto:dacocreator21@gmail.com">dacocreator21@gmail.com</a></dd></div>
         <div><dt>X</dt><dd><a href="https://x.com/DACO_2026" target="_blank" rel="noopener">@DACO_2026</a></dd></div>
         <div><dt>Discord</dt><dd>shomar_ow</dd></div>
-        <div><dt>Other</dt><dd>LINE / Instagram など必要に応じて対応可能</dd></div>
+        <div><dt>Other</dt><dd data-i18n="contact.other">LINE / Instagram など必要に応じて対応可能</dd></div>
       </dl>
     </div>
   </section>
 </main>
 
 <footer class="footer">
-  <img class="footer__mark" src="assets/img/daco_logo.png" alt="DACOロゴ">
+  <img class="footer__mark" src="assets/img/daco_logo.png" alt="DACO">
   <p class="footer__logo">DACO<span class="grad-text" id="dot">.</span></p>
   <p class="footer__note">AI CREATIVE PORTFOLIO — Enjoy Create! Fun comes first.</p>
   <p class="footer__copy">© 2026 DACO. All rights reserved.</p>
 </footer>
 
+<script src="assets/data/i18n.js"></script>
+<script src="assets/js/i18n.js"></script>
 <script src="assets/data/works.js"></script>
 <script src="assets/js/works.js"></script>
 <script src="assets/js/main.js"></script>

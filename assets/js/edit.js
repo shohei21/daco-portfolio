@@ -13,7 +13,12 @@
 
   const CFG = window.DACO_EDIT_CONFIG || {};
   const PATHS = Object.assign(
-    { works: 'assets/data/works.js', config: 'assets/js/edit-config.js', imageDir: 'assets/img/uploads' },
+    {
+      works: 'assets/data/works.js',
+      config: 'assets/js/edit-config.js',
+      imageDir: 'assets/img/uploads',
+      videoDir: 'assets/video'
+    },
     CFG.paths || {}
   );
   const LS = {
@@ -462,26 +467,40 @@
   function commit() { saveDraft(); renderList(); applyPreview(); }
 
   /* ------------------------------ 作品リスト ------------------------------- */
-  // 旧形式(youtubeId 単体)のデータも編集できるように正規化する
+  // 旧形式(youtubeId 単体 / kind なし)のデータも編集できるように正規化する
+  const blankMedia = () => ({ kind: 'youtube', id: '', src: '', label: '', labelEn: '', thumb: '' });
+
   function videosOf(w) {
     if (Array.isArray(w.videos) && w.videos.length) return w.videos;
-    if (w.youtubeId) return [{ id: w.youtubeId, label: '', thumb: w.thumb || '' }];
+    if (w.youtubeId) return [{ kind: 'youtube', id: w.youtubeId, src: '', label: '', thumb: w.thumb || '' }];
     return [];
   }
   function normalize(w) {
-    w.videos = videosOf(w).map((v) => ({ id: v.id || '', label: v.label || '', thumb: v.thumb || '' }));
+    w.videos = videosOf(w).map((v) => {
+      const m = Object.assign(blankMedia(), v);
+      if (!v.kind) m.kind = v.id ? 'youtube' : v.src ? (window.DacoWorks.detectMedia(v.src) || {}).kind || 'image' : 'youtube';
+      return m;
+    });
     delete w.youtubeId;
     delete w.thumb;
-    if (!w.videos.length) w.videos = [{ id: '', label: '', thumb: '' }];
+    if (!w.videos.length) w.videos = [blankMedia()];
     return w;
+  }
+  // メディア項目の「入力欄に表示する文字列」（YouTubeならID、ファイルならURL/パス）
+  const mediaValue = (m) => (m.kind === 'youtube' ? m.id || '' : m.src || '');
+  const KIND_LABEL = { youtube: 'YouTube', video: '動画ファイル', image: '画像ファイル' };
+  const KIND_ICON = { youtube: '▶', video: '🎞', image: '🖼' };
+
+  function mediaThumb(m) {
+    if (m.thumb) return m.thumb;
+    if (m.kind === 'image') return m.src;
+    if (m.kind === 'youtube' && m.id) return `https://i.ytimg.com/vi/${m.id}/mqdefault.jpg`;
+    return '';
   }
   function thumbOf(w) {
     if (w.type === 'image') return (w.images && w.images[0] && w.images[0].src) || '';
     const v = videosOf(w)[0];
-    if (!v) return '';
-    if (v.thumb) return v.thumb;
-    if (v.id) return `https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`;
-    return '';
+    return v ? mediaThumb(Object.assign(blankMedia(), v)) : '';
   }
 
   function renderList() {
@@ -493,8 +512,8 @@
           <div class="dedit-item__grip" title="ドラッグで並び替え">⠿</div>
           <div class="dedit-item__thumb">${t ? `<img src="${esc(t)}" alt="">` : '<span>—</span>'}</div>
           <div class="dedit-item__main">
-            <p class="dedit-item__title">${esc(w.title || '（無題）')}</p>
-            <p class="dedit-item__meta">${w.type === 'image' ? '🖼 画像 ' + ((w.images||[]).length) + '枚' : '🎬 動画 ' + videosOf(w).length + '本' + (w.vertical ? '・縦型' : '')}${w.hidden ? ' ・<b>非表示</b>' : ''}</p>
+            <p class="dedit-item__title">${esc(window.DacoI18n.pick(w, 'title') || '（無題）')}</p>
+            <p class="dedit-item__meta">${w.type === 'image' ? '🖼 画像 ' + ((w.images||[]).length) + '枚' : '🎬 メディア ' + videosOf(w).length + '件' + (w.vertical ? '・縦型' : '')}${w.hidden ? ' ・<b>非表示</b>' : ''}</p>
           </div>
           <div class="dedit-item__ops">
             <button class="dedit-mini" data-act="up" title="上へ">▲</button>
@@ -540,7 +559,7 @@
   function blankWork() {
     return {
       id: uid(), type: 'youtube', title: '', vertical: false,
-      videos: [{ id: '', label: '', thumb: '' }],
+      videos: [blankMedia()],
       images: [],
       badges: [{ text: 'AI Video', style: '' }],
       overview: '',
@@ -571,6 +590,7 @@
   function openForm(idx) {
     buildUI();
     formIdx = idx;
+    formLang = 'ja';
     formData = normalize(idx < 0 ? blankWork() : clone(works[idx]));
     $('.dedit-modal__title', ui.modal).textContent = idx < 0 ? '作品を追加' : '作品を編集';
     renderForm();
@@ -583,59 +603,80 @@
     ui.root.classList.remove('has-modal');
   }
 
+  // 入力中の言語（ja / en）。en のときは各項目の "〜En" フィールドを編集する
+  let formLang = 'ja';
+  const F = (k) => (formLang === 'en' ? k + 'En' : k);
+  const FV = (o, k) => esc(o[F(k)] || '');
+  // 英語入力時は、日本語の内容をプレースホルダに出して翻訳しやすくする
+  const FP = (o, k, ph) => esc(formLang === 'en' ? (o[k] ? '日本語: ' + o[k] : 'English') : ph);
+
   function renderForm() {
     const d = formData;
+    const en = formLang === 'en';
     ui.body.innerHTML = `
+      <div class="dedit-langbar">
+        <span>入力する言語</span>
+        <div class="dedit-seg dedit-seg--sm">
+          <label class="dedit-segbtn${!en ? ' is-on' : ''}"><input type="radio" name="dlang" value="ja" ${!en?'checked':''}>🇯🇵 日本語</label>
+          <label class="dedit-segbtn${en ? ' is-on' : ''}"><input type="radio" name="dlang" value="en" ${en?'checked':''}>🇬🇧 English</label>
+        </div>
+      </div>
+      ${en ? '<p class="dedit-note">英語版を入力中です。空欄のままにした項目は、英語表示のときも日本語がそのまま出ます。</p>' : ''}
+
       <section class="dedit-fs">
         <h3 class="dedit-fs__t"><span>1</span>メディアの種類</h3>
         <div class="dedit-seg">
-          <label class="dedit-segbtn${d.type === 'youtube' ? ' is-on' : ''}"><input type="radio" name="dtype" value="youtube" ${d.type==='youtube'?'checked':''}>🎬 動画（YouTube）</label>
-          <label class="dedit-segbtn${d.type === 'image' ? ' is-on' : ''}"><input type="radio" name="dtype" value="image" ${d.type==='image'?'checked':''}>🖼 画像（ギャラリー）</label>
+          <label class="dedit-segbtn${d.type === 'youtube' ? ' is-on' : ''}"><input type="radio" name="dtype" value="youtube" ${d.type==='youtube'?'checked':''}>🎬 動画・メディア</label>
+          <label class="dedit-segbtn${d.type === 'image' ? ' is-on' : ''}"><input type="radio" name="dtype" value="image" ${d.type==='image'?'checked':''}>🖼 画像ギャラリー</label>
         </div>
         <div class="dedit-media"></div>
       </section>
 
       <section class="dedit-fs">
         <h3 class="dedit-fs__t"><span>2</span>基本情報</h3>
-        <label class="dedit-lb">作品タイトル <b class="dedit-req">必須</b>
-          <input class="dedit-in" data-f="title" value="${esc(d.title)}" placeholder="例）超次元サッカー">
+        <label class="dedit-lb">作品タイトル${en ? '（英語）' : ' <b class="dedit-req">必須</b>'}
+          <input class="dedit-in" data-f="title" value="${FV(d,'title')}" placeholder="${FP(d,'title','例）超次元サッカー')}">
         </label>
-        <label class="dedit-lb">概要（1〜3行）
-          <textarea class="dedit-in dedit-ta" data-f="overview" rows="3" placeholder="どんな作品かを短く説明します">${esc(d.overview)}</textarea>
+        <label class="dedit-lb">概要（1〜3行）${en ? '（英語）' : ''}
+          <textarea class="dedit-in dedit-ta" data-f="overview" rows="3" placeholder="${FP(d,'overview','どんな作品かを短く説明します')}">${FV(d,'overview')}</textarea>
         </label>
         <div class="dedit-lb">バッジ（作品の上に出るラベル）
           <div class="dedit-badges"></div>
-          <div class="dedit-presets">
+          ${en ? '' : `<div class="dedit-presets">
             ${BADGE_PRESETS.map((p, i) => `<button type="button" class="dedit-chip" data-preset="${i}">＋ ${esc(p.text)}</button>`).join('')}
             <button type="button" class="dedit-chip dedit-chip--free" data-preset="free">＋ 自由入力</button>
-          </div>
+          </div>`}
         </div>
       </section>
 
       <section class="dedit-fs">
         <h3 class="dedit-fs__t"><span>3</span>アピールポイント</h3>
         <div class="dedit-points"></div>
-        <button type="button" class="dedit-btn dedit-btn--sm" data-pt="add">＋ 項目を追加</button>
+        ${en ? '' : '<button type="button" class="dedit-btn dedit-btn--sm" data-pt="add">＋ 項目を追加</button>'}
       </section>
 
       <section class="dedit-fs">
         <h3 class="dedit-fs__t"><span>4</span>制作情報</h3>
-        <label class="dedit-lb">使用ツール
-          <input class="dedit-in" data-f="tools" value="${esc(d.tools)}" placeholder="例）ChatGPT / Midjourney / Seedance2.0">
+        <label class="dedit-lb">使用ツール${en ? '（英語）' : ''}
+          <input class="dedit-in" data-f="tools" value="${FV(d,'tools')}" placeholder="${FP(d,'tools','例）ChatGPT / Midjourney / Seedance2.0')}">
         </label>
-        <label class="dedit-lb">担当範囲
-          <input class="dedit-in" data-f="range" value="${esc(d.range)}" placeholder="例）企画・構成・画像生成・動画生成（ALL）">
+        <label class="dedit-lb">担当範囲${en ? '（英語）' : ''}
+          <input class="dedit-in" data-f="range" value="${FV(d,'range')}" placeholder="${FP(d,'range','例）企画・構成・画像生成・動画生成（ALL）')}">
         </label>
         <div class="dedit-2col">
           <label class="dedit-lb">関連リンクURL（任意）
-            <input class="dedit-in" data-f="linkUrl" value="${esc(d.linkUrl)}" placeholder="https://x.com/...">
+            <input class="dedit-in" data-f="linkUrl" value="${esc(d.linkUrl)}" placeholder="https://x.com/..." ${en ? 'disabled' : ''}>
           </label>
-          <label class="dedit-lb">リンクの文言
-            <input class="dedit-in" data-f="linkLabel" value="${esc(d.linkLabel)}" placeholder="受賞発表ポストを見る">
+          <label class="dedit-lb">リンクの文言${en ? '（英語）' : ''}
+            <input class="dedit-in" data-f="linkLabel" value="${FV(d,'linkLabel')}" placeholder="${FP(d,'linkLabel','受賞発表ポストを見る')}">
           </label>
         </div>
-        <label class="dedit-check"><input type="checkbox" data-f="hidden" ${d.hidden ? 'checked' : ''}> この作品をサイトに表示しない（下書き扱い）</label>
+        ${en ? '' : `<label class="dedit-check"><input type="checkbox" data-f="hidden" ${d.hidden ? 'checked' : ''}> この作品をサイトに表示しない（下書き扱い）</label>`}
       </section>`;
+
+    $$('input[name=dlang]', ui.body).forEach((r) =>
+      r.addEventListener('change', () => { formLang = r.value; renderForm(); })
+    );
 
     renderMediaBlock();
     renderBadges();
@@ -645,7 +686,9 @@
     $$('[data-f]', ui.body).forEach((inp) => {
       inp.addEventListener('input', () => {
         const k = inp.dataset.f;
-        formData[k] = inp.type === 'checkbox' ? inp.checked : inp.value;
+        if (inp.type === 'checkbox') { formData[k] = inp.checked; return; }
+        // linkUrl だけは言語で分けない（URLは共通）
+        formData[k === 'linkUrl' ? k : F(k)] = inp.value;
       });
     });
     $$('input[name=dtype]', ui.body).forEach((r) =>
@@ -662,10 +705,14 @@
         renderBadges();
       })
     );
-    $('[data-pt=add]', ui.body).addEventListener('click', () => {
-      formData.points.push({ label: '', text: '' });
-      renderPoints();
-    });
+    // 英語タブでは「項目を追加」ボタンを出していないので、ある場合だけ結線する
+    const addPt = $('[data-pt=add]', ui.body);
+    if (addPt) {
+      addPt.addEventListener('click', () => {
+        formData.points.push({ label: '', text: '' });
+        renderPoints();
+      });
+    }
   }
 
   function renderMediaBlock() {
@@ -673,17 +720,33 @@
     const d = formData;
     if (d.type === 'youtube') {
       box.innerHTML = `
-        <label class="dedit-check"><input type="checkbox" id="deditVert" ${d.vertical ? 'checked' : ''}> 縦型（Shorts）として表示する</label>
-        <p class="dedit-hint">YouTubeのURLを貼るだけでOK。複数本を登録すると、作品カードの下にサムネイルの切り替えボタンが並びます（1本目が最初に表示されます）。</p>
+        <label class="dedit-check"><input type="checkbox" id="deditVert" ${d.vertical ? 'checked' : ''}> 縦型（Shorts / 9:16）として表示する</label>
+        <p class="dedit-hint">
+          <b>3種類に対応しています。</b>入力欄に貼り付けるだけで自動で判別します。<br>
+          ・YouTube … <code>https://youtu.be/xxxx</code> や Shorts のURL<br>
+          ・動画ファイル … <code>.mp4</code> <code>.webm</code> で終わるURL / パス（例 <code>assets/video/demo.mp4</code>）<br>
+          ・画像ファイル … <code>.png</code> <code>.jpg</code> <code>.gif</code> <code>.webp</code> で終わるURL / パス<br>
+          複数登録すると、作品カードの下に切り替えボタンが並びます（1件目が最初に表示されます）。
+        </p>
         <div class="dedit-vids"></div>
-        <button type="button" class="dedit-btn dedit-btn--sm" id="deditVidAdd">＋ 動画を追加</button>`;
+        <div class="dedit-vidadd">
+          <button type="button" class="dedit-btn dedit-btn--sm" id="deditVidAdd">＋ URLで追加</button>
+          <button type="button" class="dedit-btn dedit-btn--sm" id="deditVidUpload">⬆ 手元のファイルから追加</button>
+          <input type="file" id="deditVidFile" accept="video/*,image/*" hidden>
+        </div>`;
       $('#deditVert', box).addEventListener('change', (e) => { d.vertical = e.target.checked; renderVideos(); });
       $('#deditVidAdd', box).addEventListener('click', () => {
-        d.videos.push({ id: '', label: '', thumb: '' });
+        d.videos.push(blankMedia());
         renderVideos();
         const rows = $$('.dedit-vid', ui.body);
         const last = rows[rows.length - 1];
         if (last) $('[data-vurl]', last).focus();
+      });
+      $('#deditVidUpload', box).addEventListener('click', () => $('#deditVidFile', box).click());
+      $('#deditVidFile', box).addEventListener('change', async (e) => {
+        const f = e.target.files && e.target.files[0];
+        e.target.value = '';
+        if (f) await addMediaFile(f);
       });
       renderVideos();
     } else {
@@ -709,25 +772,80 @@
     }
   }
 
+  // 手元のファイルを1件追加する。
+  // 画像は下書きに埋め込み（公開時にアップロード）、動画はサイズが大きいのでその場でGitHubへ上げる。
+  async function addMediaFile(file) {
+    const isVideo = /^video\//.test(file.type);
+    if (!isVideo && !/^image\//.test(file.type)) {
+      toast('画像ファイルか動画ファイルを選んでください', true);
+      return;
+    }
+    if (!isVideo) {
+      const r = await processImage(file);
+      formData.videos.push(Object.assign(blankMedia(), { kind: 'image', src: r.src }));
+      renderVideos();
+      toast('画像を追加しました');
+      return;
+    }
+    // ---- 動画ファイル ----
+    if (file.size > 90 * 1024 * 1024) {
+      toast('動画が大きすぎます（90MBまで）。YouTubeにアップして、そのURLを貼ってください', true);
+      return;
+    }
+    if (!getToken()) {
+      toast('動画ファイルの追加にはGitHubトークンが必要です。「設定」タブで登録してください', true);
+      return;
+    }
+    const mb = file.size / 1048576;
+    if (
+      !confirm(
+        `「${file.name}」（約${mb.toFixed(1)}MB）をGitHubの ${PATHS.videoDir}/ にアップロードします。\n` +
+          'サイズが大きいと表示に時間がかかります。よろしいですか？'
+      )
+    ) return;
+
+    toast('動画をアップロード中…（少し時間がかかります）');
+    try {
+      const dataUrl = await new Promise((res, rej) => {
+        const fr = new FileReader();
+        fr.onload = () => res(String(fr.result));
+        fr.onerror = rej;
+        fr.readAsDataURL(file);
+      });
+      const safe = file.name.replace(/[^A-Za-z0-9._-]/g, '_');
+      const path = `${PATHS.videoDir}/${Date.now().toString(36)}-${safe}`;
+      await ghPut(path, dataUrl.split(',')[1], `動画追加: ${path}`);
+      formData.videos.push(Object.assign(blankMedia(), { kind: 'video', src: path }));
+      renderVideos();
+      toast('動画をアップロードしました');
+    } catch (e) {
+      toast('アップロードに失敗しました: ' + e.message, true);
+    }
+  }
+
   function renderVideos() {
     const box = $('.dedit-vids', ui.body);
     if (!box) return;
     const d = formData;
+    const en = formLang === 'en';
+
     box.innerHTML = d.videos
       .map(
         (v, i) => `<div class="dedit-vid" data-i="${i}">
           <div class="dedit-vid__no">${i + 1}</div>
           <div class="dedit-vid__main">
-            <input class="dedit-in dedit-in--sm" data-vurl="${i}" value="${esc(v.id)}" placeholder="https://youtu.be/xxxxxxxxxxx を貼り付け">
-            <input class="dedit-in dedit-in--sm" data-vlabel="${i}" value="${esc(v.label)}" placeholder="この動画のラベル（例：本編／メイキング）任意">
+            <input class="dedit-in dedit-in--sm" data-vurl="${i}" value="${esc(mediaValue(v))}"
+              placeholder="YouTubeのURL / .mp4 / .png などを貼り付け" ${en ? 'disabled' : ''}>
+            <input class="dedit-in dedit-in--sm" data-vlabel="${i}" value="${esc(v[en ? 'labelEn' : 'label'] || '')}"
+              placeholder="${esc(en ? (v.label ? '日本語: ' + v.label : 'Label (English)') : 'このメディアのラベル（例：本編／メイキング）任意')}">
             <div class="dedit-vid__prev"></div>
-            <div class="dedit-vid__ops">
+            ${en ? '' : `<div class="dedit-vid__ops">
               <button type="button" class="dedit-mini" data-vid="up" data-i="${i}" title="上へ">▲</button>
               <button type="button" class="dedit-mini" data-vid="down" data-i="${i}" title="下へ">▼</button>
               <button type="button" class="dedit-mini" data-vid="thumb" data-i="${i}">サムネ指定</button>
               ${v.thumb ? `<button type="button" class="dedit-mini" data-vid="thumbdel" data-i="${i}">サムネ解除</button>` : ''}
               <button type="button" class="dedit-mini dedit-mini--danger" data-vid="del" data-i="${i}">削除</button>
-            </div>
+            </div>`}
           </div>
         </div>`
       )
@@ -752,20 +870,41 @@
       if (!row) return;
       const v = d.videos[i];
       const prev = $('.dedit-vid__prev', row);
-      const raw = $(`[data-vurl="${i}"]`, box).value;
-      prev.innerHTML = v.thumb
-        ? `<div class="dedit-prevbox"><img src="${esc(v.thumb)}" alt=""><span>✔ 指定サムネイル${v.id ? '（動画ID: <b>' + esc(v.id) + '</b>）' : ''}</span></div>`
-        : v.id
-        ? `<div class="dedit-prevbox"><img src="https://i.ytimg.com/vi/${esc(v.id)}/mqdefault.jpg" alt=""><span>✔ 動画ID: <b>${esc(v.id)}</b></span></div>`
-        : raw
-        ? '<p class="dedit-err">YouTubeのURL/IDが読み取れません</p>'
-        : '';
+      const raw = $(`[data-vurl="${i}"]`, box).value.trim();
+      const th = mediaThumb(v);
+      const ok = v.kind === 'youtube' ? !!v.id : !!v.src;
+
+      if (!ok) {
+        prev.innerHTML = raw
+          ? '<p class="dedit-err">読み取れません。YouTubeのURL、または .mp4 / .png などで終わるURL・パスを入れてください</p>'
+          : '';
+        return;
+      }
+      const badge = `<b>${KIND_ICON[v.kind]} ${KIND_LABEL[v.kind]}</b>`;
+      const detail =
+        v.kind === 'youtube'
+          ? `動画ID: <b>${esc(v.id)}</b>`
+          : esc(v.src.length > 46 ? '…' + v.src.slice(-44) : v.src);
+      const visual =
+        v.kind === 'video' && !th
+          ? '<span class="dedit-prevbox__ph">🎞</span>'
+          : `<img src="${esc(th)}" alt="">`;
+      prev.innerHTML = `<div class="dedit-prevbox">${visual}<span>✔ ${badge}<br>${detail}</span></div>`;
     };
 
     $$('[data-vurl]', box).forEach((inp) =>
       inp.addEventListener('input', () => {
         const i = Number(inp.dataset.vurl);
-        d.videos[i].id = parseYouTube(inp.value);
+        const det = window.DacoWorks.detectMedia(inp.value);
+        const v = d.videos[i];
+        if (det) {
+          v.kind = det.kind;
+          v.id = det.id || '';
+          v.src = det.src || '';
+        } else {
+          v.id = '';
+          v.src = '';
+        }
         if (/\/shorts\//.test(inp.value) && !d.vertical) {
           d.vertical = true;
           const vc = $('#deditVert', ui.body);
@@ -775,7 +914,9 @@
       })
     );
     $$('[data-vlabel]', box).forEach((inp) =>
-      inp.addEventListener('input', () => { d.videos[Number(inp.dataset.vlabel)].label = inp.value; })
+      inp.addEventListener('input', () => {
+        d.videos[Number(inp.dataset.vlabel)][en ? 'labelEn' : 'label'] = inp.value;
+      })
     );
     $$('[data-vid]', box).forEach((b) =>
       b.addEventListener('click', () => {
@@ -783,7 +924,7 @@
         const a = d.videos;
         switch (b.dataset.vid) {
           case 'del':
-            if (a.length <= 1) { a[0] = { id: '', label: '', thumb: '' }; }
+            if (a.length <= 1) a[0] = blankMedia();
             else a.splice(i, 1);
             break;
           case 'up': if (i > 0) a.splice(i - 1, 0, a.splice(i, 1)[0]); break;
@@ -823,11 +964,11 @@
         (im, i) => `<div class="dedit-img" data-i="${i}">
           <img src="${esc(im.src)}" alt="">
           <div class="dedit-img__side">
-            <input class="dedit-in dedit-in--sm" data-alt="${i}" value="${esc(im.alt)}" placeholder="画像の説明（任意）">
+            <input class="dedit-in dedit-in--sm" data-alt="${i}" value="${esc(im[formLang === 'en' ? 'altEn' : 'alt'] || '')}" placeholder="${esc(formLang === 'en' ? (im.alt ? '日本語: ' + im.alt : 'Description (English)') : '画像の説明（任意）')}">
             <div class="dedit-img__ops">
-              <button type="button" class="dedit-mini" data-img="up" data-i="${i}">▲</button>
+              ${formLang === 'en' ? '' : `<button type="button" class="dedit-mini" data-img="up" data-i="${i}">▲</button>
               <button type="button" class="dedit-mini" data-img="down" data-i="${i}">▼</button>
-              <button type="button" class="dedit-mini dedit-mini--danger" data-img="del" data-i="${i}">削除</button>
+              <button type="button" class="dedit-mini dedit-mini--danger" data-img="del" data-i="${i}">削除</button>`}
               <span class="dedit-img__size">${/^data:/.test(im.src) ? fmtSize(bytesOfDataUrl(im.src)) + '・未アップロード' : '公開済'}</span>
             </div>
           </div>
@@ -846,7 +987,9 @@
       })
     );
     $$('[data-alt]', box).forEach((inp) =>
-      inp.addEventListener('input', () => { formData.images[Number(inp.dataset.alt)].alt = inp.value; })
+      inp.addEventListener('input', () => {
+        formData.images[Number(inp.dataset.alt)][formLang === 'en' ? 'altEn' : 'alt'] = inp.value;
+      })
     );
   }
 
@@ -855,15 +998,19 @@
     box.innerHTML = formData.badges
       .map(
         (b, i) => `<div class="dedit-badgerow" data-i="${i}">
-          <input class="dedit-in dedit-in--sm" data-bt="${i}" value="${esc(b.text)}" placeholder="バッジの文字">
-          <select class="dedit-in dedit-in--sm" data-bs="${i}">
+          <input class="dedit-in dedit-in--sm" data-bt="${i}" value="${esc(b[formLang === 'en' ? 'textEn' : 'text'] || '')}" placeholder="${esc(formLang === 'en' ? (b.text ? '日本語: ' + b.text : 'Badge (English)') : 'バッジの文字')}">
+          ${formLang === 'en' ? '' : `<select class="dedit-in dedit-in--sm" data-bs="${i}">
             ${BADGE_STYLES.map((s) => `<option value="${s.v}" ${s.v === (b.style||'') ? 'selected' : ''}>${s.n}</option>`).join('')}
           </select>
-          <button type="button" class="dedit-mini dedit-mini--danger" data-bd="${i}">✕</button>
+          <button type="button" class="dedit-mini dedit-mini--danger" data-bd="${i}">✕</button>`}
         </div>`
       )
       .join('');
-    $$('[data-bt]', box).forEach((i) => i.addEventListener('input', () => { formData.badges[Number(i.dataset.bt)].text = i.value; }));
+    $$('[data-bt]', box).forEach((i) =>
+      i.addEventListener('input', () => {
+        formData.badges[Number(i.dataset.bt)][formLang === 'en' ? 'textEn' : 'text'] = i.value;
+      })
+    );
     $$('[data-bs]', box).forEach((i) => i.addEventListener('change', () => { formData.badges[Number(i.dataset.bs)].style = i.value; }));
     $$('[data-bd]', box).forEach((i) => i.addEventListener('click', () => { formData.badges.splice(Number(i.dataset.bd), 1); renderBadges(); }));
   }
@@ -873,29 +1020,46 @@
     box.innerHTML = formData.points
       .map(
         (p, i) => `<div class="dedit-pointrow">
-          <input class="dedit-in dedit-in--sm dedit-in--label" data-pl="${i}" value="${esc(p.label)}" placeholder="項目名">
-          <input class="dedit-in dedit-in--sm" data-px="${i}" value="${esc(p.text)}" placeholder="内容">
-          <button type="button" class="dedit-mini dedit-mini--danger" data-pd="${i}">✕</button>
+          <input class="dedit-in dedit-in--sm dedit-in--label" data-pl="${i}" value="${esc(p[formLang === 'en' ? 'labelEn' : 'label'] || '')}" placeholder="${esc(formLang === 'en' ? (p.label || 'Label') : '項目名')}">
+          <input class="dedit-in dedit-in--sm" data-px="${i}" value="${esc(p[formLang === 'en' ? 'textEn' : 'text'] || '')}" placeholder="${esc(formLang === 'en' ? (p.text ? '日本語: ' + p.text : 'Text (English)') : '内容')}">
+          ${formLang === 'en' ? '' : `<button type="button" class="dedit-mini dedit-mini--danger" data-pd="${i}">✕</button>`}
         </div>`
       )
       .join('');
-    $$('[data-pl]', box).forEach((i) => i.addEventListener('input', () => { formData.points[Number(i.dataset.pl)].label = i.value; }));
-    $$('[data-px]', box).forEach((i) => i.addEventListener('input', () => { formData.points[Number(i.dataset.px)].text = i.value; }));
+    $$('[data-pl]', box).forEach((i) =>
+      i.addEventListener('input', () => {
+        formData.points[Number(i.dataset.pl)][formLang === 'en' ? 'labelEn' : 'label'] = i.value;
+      })
+    );
+    $$('[data-px]', box).forEach((i) =>
+      i.addEventListener('input', () => {
+        formData.points[Number(i.dataset.px)][formLang === 'en' ? 'textEn' : 'text'] = i.value;
+      })
+    );
     $$('[data-pd]', box).forEach((i) => i.addEventListener('click', () => { formData.points.splice(Number(i.dataset.pd), 1); renderPoints(); }));
   }
 
   function saveForm() {
     const d = formData;
-    if (!String(d.title).trim()) { toast('作品タイトルを入力してください', true); return; }
+    if (!String(d.title || '').trim()) {
+      toast('作品タイトル（日本語）を入力してください', true);
+      if (formLang === 'en') { formLang = 'ja'; renderForm(); }
+      return;
+    }
     if (d.type === 'youtube') {
-      d.videos = (d.videos || []).filter((v) => v && v.id);
-      if (!d.videos.length) { toast('YouTubeのURLまたは動画IDを入力してください', true); return; }
+      d.videos = (d.videos || []).filter((v) => v && (v.kind === 'youtube' ? v.id : v.src));
+      if (!d.videos.length) {
+        toast('YouTubeのURL、または .mp4 / .png などのURL・パスを入力してください', true);
+        if (formLang === 'en') { formLang = 'ja'; renderForm(); }
+        return;
+      }
     } else {
       d.videos = [];
     }
     if (d.type === 'image' && !(d.images || []).length) { toast('画像を1枚以上追加してください', true); return; }
-    d.badges = (d.badges || []).filter((b) => b.text && b.text.trim());
-    d.points = (d.points || []).filter((p) => (p.label && p.label.trim()) || (p.text && p.text.trim()));
+    d.badges = (d.badges || []).filter((b) => (b.text && b.text.trim()) || (b.textEn && b.textEn.trim()));
+    // 中身が空の項目は出さない（ラベルだけ残っていても表示しない）
+    d.points = (d.points || []).filter((p) => (p.text && p.text.trim()) || (p.textEn && p.textEn.trim()));
     if (formIdx < 0) works.push(d); else works[formIdx] = d;
     closeForm();
     commit();
@@ -963,7 +1127,10 @@
     let n = 0;
     works.forEach((w) => {
       (w.images || []).forEach((im) => { if (/^data:/.test(im.src)) n++; });
-      (w.videos || []).forEach((v) => { if (/^data:/.test(v.thumb || '')) n++; });
+      (w.videos || []).forEach((v) => {
+        if (/^data:/.test(v.thumb || '')) n++;
+        if (/^data:/.test(v.src || '')) n++;
+      });
     });
     return n;
   }
@@ -1047,7 +1214,10 @@
         const w = out[wi];
         const targets = [];
         (w.images || []).forEach((im, i) => { if (/^data:/.test(im.src)) targets.push({ obj: im, key: 'src', i }); });
-        (w.videos || []).forEach((v, i) => { if (/^data:/.test(v.thumb || '')) targets.push({ obj: v, key: 'thumb', i: 'thumb' + (i + 1) }); });
+        (w.videos || []).forEach((v, i) => {
+          if (/^data:/.test(v.thumb || '')) targets.push({ obj: v, key: 'thumb', i: 'thumb' + (i + 1) });
+          if (/^data:image\//.test(v.src || '')) targets.push({ obj: v, key: 'src', i: 'm' + (i + 1) });
+        });
         for (const t of targets) {
           const dataUrl = t.obj[t.key];
           const ext = /^data:image\/png/.test(dataUrl) ? 'png' : 'jpg';
@@ -1122,7 +1292,8 @@ window.DACO_EDIT_CONFIG = {
   paths: {
     works: '${PATHS.works}',
     config: '${PATHS.config}',
-    imageDir: '${PATHS.imageDir}'
+    imageDir: '${PATHS.imageDir}',
+    videoDir: '${PATHS.videoDir}'
   }
 };
 `;
@@ -1160,5 +1331,13 @@ window.DACO_EDIT_CONFIG = {
   /* -------------------------------- 起動 ---------------------------------- */
   // 下書きが残っていれば、ロック解除前でも本人に気づけるよう何もしない（公開データを表示）
   installTriggers();
+  // サイトの言語が切り替わったら、パネルの一覧とプレビューも合わせる
+  window.addEventListener('daco:langchange', () => {
+    if (!unlocked) return;
+    renderList();
+    window.DacoWorks.render(works);
+    const list = document.getElementById('worksList');
+    if (list) $$('.reveal', list).forEach((e) => e.classList.add('is-visible'));
+  });
   window.DacoEdit = { open: openGate };
 })();

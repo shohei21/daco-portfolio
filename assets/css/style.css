@@ -618,11 +618,59 @@ em { font-style: normal; }
 }
 .work__link:hover { opacity: 0.75; }
 
+/* ---------- 言語切り替え ---------- */
+.langsw {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
+  margin-left: 14px;
+}
+.langsw button {
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  padding: 5px 11px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: color 0.25s, background 0.25s;
+}
+.langsw button:hover { color: var(--text); }
+.langsw button.is-active {
+  color: #0b0b12;
+  background: var(--c2);
+}
+
 /* 複数動画の切り替え */
 .work__media--videos { display: grid; gap: 12px; }
 .work__media--videos.work__media--vertical { justify-items: center; }
 .work__media--videos.work__media--vertical .yt,
-.work__media--videos.work__media--vertical .vidnav { width: min(100%, 320px); }
+.work__media--videos.work__media--vertical /* 動画ファイル(mp4など)・画像ファイルをそのまま載せる場合 */
+.yt--file { cursor: default; background: #05050a; }
+.yt--file:hover { transform: none; box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55); }
+.yt--file video,
+.yt--file img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  background: #05050a;
+}
+.yt--file:hover img { transform: none; }
+.yt--file a { display: block; width: 100%; height: 100%; cursor: zoom-in; }
+
+.vidnav__ph {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.vidnav { width: min(100%, 320px); }
 
 .vidnav {
   display: grid;
@@ -995,6 +1043,10 @@ em { font-style: normal; }
   .nav__burger.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
   .nav__burger.is-open span:nth-child(2) { opacity: 0; }
   .nav__burger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* 言語切替はメニューを開いていても押せるように前面へ */
+  .langsw { position: relative; z-index: 110; margin-left: auto; margin-right: 6px; }
+  .langsw button { padding: 5px 9px; font-size: 0.66rem; }
 
   .strengths { grid-template-columns: 1fr; }
   .flow { grid-template-columns: 1fr; }

@@ -20,6 +20,7 @@ window.DACO_EDIT_CONFIG = {
   paths: {
     works: 'assets/data/works.js',
     config: 'assets/js/edit-config.js',
-    imageDir: 'assets/img/uploads'
+    imageDir: 'assets/img/uploads',
+    videoDir: 'assets/video'
   }
 };
