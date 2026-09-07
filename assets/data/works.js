@@ -7,6 +7,81 @@ window.DACO_WORKS = {
   "version": 1,
   "works": [
     {
+      "id": "w05",
+      "type": "youtube",
+      "title": "キッズ向け動画",
+      "titleEn": "Kids' Learning Animation",
+      "videos": [
+        {
+          "kind": "youtube",
+          "id": "Vgkn3Ir7ijk",
+          "src": "",
+          "label": "はむすたっ！雨編",
+          "labelEn": "HamStudy! — Rain episode",
+          "thumb": ""
+        },
+        {
+          "kind": "youtube",
+          "id": "oTwvAk6Jois",
+          "src": "",
+          "label": "はむすたっ！虹編",
+          "labelEn": "HamStudy! — Rainbow episode",
+          "thumb": ""
+        }
+      ],
+      "vertical": false,
+      "images": [],
+      "badges": [
+        {
+          "text": "🏅 WFAIA ファイナリスト選出作品",
+          "textEn": "🏅 WFAIA Finalist",
+          "style": "award"
+        },
+        {
+          "text": "AI Video",
+          "style": "",
+          "textEn": ""
+        },
+        {
+          "text": "コンテスト応募",
+          "style": "outline",
+          "textEn": "Contest entry"
+        },
+        {
+          "text": "SNS投稿用",
+          "style": "outline",
+          "textEn": "For social media"
+        }
+      ],
+      "overview": "3匹のキャラクターがキッズ向けに、「なんで？」を一緒に解決する知育アニメ動画。",
+      "overviewEn": "An educational animation in which three characters help children work through their “why?” questions together.",
+      "points": [
+        {
+          "label": "こだわった点",
+          "text": "可愛く見やすい動画制作",
+          "labelEn": "What I focused on",
+          "textEn": "Keeping it cute and easy for children to follow"
+        },
+        {
+          "label": "工夫した点",
+          "text": "キッズアニメにありそうなタイトル表示",
+          "labelEn": "The clever part",
+          "textEn": "A title card that feels like a real kids' anime"
+        },
+        {
+          "label": "見てほしい点",
+          "text": "3匹のキャラクターの表情全般",
+          "labelEn": "Where to look",
+          "textEn": "The expressions on all three characters"
+        }
+      ],
+      "tools": "Floyo AI / ChatGPT / nanobanana Pro / Seedance2.0",
+      "range": "構成検討・画像生成・動画生成・プロンプト設計（ALL）",
+      "rangeEn": "Structure, image generation, video generation, prompt design (all of it)",
+      "linkUrl": "",
+      "linkLabel": ""
+    },
+    {
       "id": "w01",
       "type": "youtube",
       "title": "超次元サッカー",
@@ -68,76 +143,6 @@ window.DACO_WORKS = {
       "linkUrl": "https://x.com/JACC_AI/status/2069737308496990638",
       "linkLabel": "受賞発表ポストを見る",
       "linkLabelEn": "See the award announcement"
-    },
-    {
-      "id": "w05",
-      "type": "youtube",
-      "title": "キッズ向け動画",
-      "titleEn": "Kids' Learning Animation",
-      "videos": [
-        {
-          "kind": "youtube",
-          "id": "Vgkn3Ir7ijk",
-          "src": "",
-          "label": "はむすたっ！雨編",
-          "labelEn": "HamStudy! — Rain episode",
-          "thumb": ""
-        },
-        {
-          "kind": "youtube",
-          "id": "oTwvAk6Jois",
-          "src": "",
-          "label": "はむすたっ！虹編",
-          "labelEn": "HamStudy! — Rainbow episode",
-          "thumb": ""
-        }
-      ],
-      "vertical": false,
-      "images": [],
-      "badges": [
-        {
-          "text": "AI Video",
-          "style": "",
-          "textEn": ""
-        },
-        {
-          "text": "コンテスト応募",
-          "style": "outline",
-          "textEn": "Contest entry"
-        },
-        {
-          "text": "SNS投稿用",
-          "style": "outline",
-          "textEn": "For social media"
-        }
-      ],
-      "overview": "3匹のキャラクターがキッズ向けに、「なんで？」を一緒に解決する知育アニメ動画。",
-      "overviewEn": "An educational animation in which three characters help children work through their “why?” questions together.",
-      "points": [
-        {
-          "label": "こだわった点",
-          "text": "可愛く見やすい動画制作",
-          "labelEn": "What I focused on",
-          "textEn": "Keeping it cute and easy for children to follow"
-        },
-        {
-          "label": "工夫した点",
-          "text": "キッズアニメにありそうなタイトル表示",
-          "labelEn": "The clever part",
-          "textEn": "A title card that feels like a real kids' anime"
-        },
-        {
-          "label": "見てほしい点",
-          "text": "3匹のキャラクターの表情全般",
-          "labelEn": "Where to look",
-          "textEn": "The expressions on all three characters"
-        }
-      ],
-      "tools": "Floyo AI / ChatGPT / nanobanana Pro / Seedance2.0",
-      "range": "構成検討・画像生成・動画生成・プロンプト設計（ALL）",
-      "rangeEn": "Structure, image generation, video generation, prompt design (all of it)",
-      "linkUrl": "",
-      "linkLabel": ""
     },
     {
       "id": "w02",
