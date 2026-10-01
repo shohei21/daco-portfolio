@@ -22,10 +22,12 @@ index.html             … 本体(全セクション)
 assets/data/works.js   … 作品データ(Selected Works の中身はここ ← 編集モードが書き換える)
 assets/data/i18n.js    … 固定テキストの日英データ(作品以外の文章はここ)
 assets/css/style.css   … スタイル(ダーク/ブランドカラー: ライム×パープル×ネオンピンク)
+assets/css/stage.css   … オープニング(カーテンの舞台)・フィルムストリップ・ハイライト等の演出
 assets/css/edit.css    … 編集モードのUI
 assets/js/i18n.js      … 言語切り替えのしくみ
 assets/js/works.js     … 作品カードの描画
 assets/js/main.js      … ナビ・スクロール演出・動画再生・ギャラリー
+assets/js/stage.js     … オープニング演出(WebGLのカーテン・DACOの動き・紙吹雪)、進捗バー、カーソルライト
 assets/js/edit.js      … 編集モード本体
 assets/js/edit-config.js … 編集モードの設定(パスワードのハッシュ・GitHub設定)
 assets/img/            … 画像(WORK04・キャラシート・チビキャラ切り抜き・ロゴ・favicon)
@@ -37,9 +39,22 @@ give/                  … 元素材(キャラシート原本・ロゴ原本)
 配色はブランドキャラクター「DACO」のカラーパレット(キャラシート記載)に準拠:
 ライム `#C6FF00` / パープル `#7A3CFF` / ネオンピンク `#FF4DFF` / ネイビー `#0A0E2B`
 
+## オープニング演出(カーテン)
+
+ページを開くと紫のベルベットのカーテンが閉じた舞台が表示され、スクロールに合わせて
+DACOが隙間から顔を出す → 飛び出す → 右のカーテンを押して幕が開く → ピースに変身(紙吹雪)
+→ 奥の舞台にキャッチコピーと作品が浮かび上がる、という流れで進みます。
+
+- カーテンは WebGL のシェーダーで描いた布(ひだが縮む・揺れる)。WebGLが使えない環境ではCSSのカーテンに自動で切り替わります
+- 舞台奥のLEDウォール・ポスター・下のフィルムストリップは `works.js` の作品から自動生成(作品を追加すると自動で増えます)
+- 吹き出しのセリフは `assets/data/i18n.js` の `stage.b1`〜`stage.b4`
+- 演出の長さは `stage.css` の `.stage { height: 330svh; }`(大きいほどゆっくり)
+- 右下の「スキップ ↓」で作品一覧へ直接移動できます。OSで「視差効果を減らす」設定の人には、幕が開いた状態で静止表示します
+- DACOの画像: `assets/img/daco_stand.webp`(立ち絵)/ `assets/img/daco_peace.webp`(ピース)
+
 ## セクション
 
-Hero(MVP受賞バッジ+マスコット) → 01 Selected Works(5作品・実績を最優先) → ✦ Character(ブランドキャラ紹介+シート2枚) → 02 Profile / About → 03 Production(できること) → 04 Strength → 05 Tools → 06 Workflow → 07 Available Work → 08 Contact
+Stage(カーテン演出+ヒーロー) → Showreel(フィルムストリップ) → Highlights → 01 Selected Works(5作品・実績を最優先) → ✦ Character(ブランドキャラ紹介+シート2枚) → 02 Profile / About → 03 Production(できること) → 04 Strength → 05 Tools → 06 Workflow → 07 Available Work → 08 Contact
 
 ※「実績とクリエイティブを冒頭に」というアドバイスを受け、WorksとCharacterをProfileより前に配置。
 

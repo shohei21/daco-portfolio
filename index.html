@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&family=Space+Grotesk:wght@300..700&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/stage.css">
 <link rel="stylesheet" href="assets/css/edit.css">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 </head>
@@ -21,7 +22,7 @@
 
 <!-- ======= ナビゲーション ======= -->
 <header class="nav" id="nav">
-  <a class="nav__logo" href="#top"><img class="nav__logo-img" src="assets/img/daco_logo.png" alt="">DACO<span class="nav__logo-dot">.</span></a>
+  <a class="nav__logo" href="#stage"><img class="nav__logo-img" src="assets/img/daco_logo.png" alt="">DACO<span class="nav__logo-dot">.</span></a>
   <nav class="nav__links" id="navLinks">
     <a href="#works">Works</a>
     <a href="#character">Character</a>
@@ -42,41 +43,87 @@
 
 <main id="top">
 
-  <!-- ======= HERO ======= -->
-  <section class="hero" id="hero">
-    <div class="hero__inner">
-      <p class="hero__eyebrow reveal">AI CREATIVE PORTFOLIO</p>
-      <a class="hero__award reveal" href="#works">
-        <span class="hero__award-icon">🏆</span>
-        <span data-i18n="hero.award">AI動画コンテスト <b>MVP受賞</b><span class="hero__award-work">—「超次元サッカー」</span></span>
-      </a>
-      <h1 class="hero__title">
-        <span class="reveal d1" data-i18n="hero.title1">創る楽しさを、</span>
-        <span class="reveal d2" data-i18n="hero.title2"><em class="grad-text">伝わるチカラ</em>に。</span>
-      </h1>
-      <p class="hero__name reveal d3">DACO<span>／ AI Creator</span></p>
-      <p class="hero__lead reveal d4" data-i18n="hero.lead">
-        生成AIを活用して、SNS・広告・IP展開に使える<br class="pc-only">
-        ビジュアルと映像企画を制作しています。
-      </p>
-      <div class="hero__tags reveal d5">
-        <span>AI IMAGE</span><span>AI VIDEO</span><span>CHARACTER DESIGN</span><span>AI MUSIC</span>
+  <!-- ======= STAGE（カーテンが開くオープニング） =======
+       スクロールに合わせてDACOがカーテンを開ける演出。仕組みは assets/js/stage.js -->
+  <section class="stage" id="stage" aria-label="Opening">
+    <div class="stage__pin">
+
+      <!-- カーテンの奥：舞台 -->
+      <div class="stage__back">
+        <div class="stage__wall" id="stageWall" aria-hidden="true"></div>
+        <div class="stage__posters" id="stagePosters" aria-hidden="true"></div>
+        <div class="stage__beams" aria-hidden="true"><i></i><i></i><i></i></div>
+
+        <div class="hero" id="hero">
+          <p class="hero__eyebrow" data-hero="0">AI CREATIVE PORTFOLIO</p>
+          <div class="hero__awards" data-hero="1">
+            <a class="hero__award" href="#works">
+              <span class="hero__award-icon">🏆</span>
+              <span data-i18n="hero.award">AI動画コンテスト <b>MVP受賞</b><span class="hero__award-work">—「超次元サッカー」</span></span>
+            </a>
+            <a class="hero__award hero__award--sub" href="#works">
+              <span class="hero__award-icon">🏅</span>
+              <span data-i18n="hero.award2"><b>WFAIA</b> ファイナリスト選出</span>
+            </a>
+          </div>
+          <h1 class="hero__title">
+            <span data-hero="2" data-i18n="hero.title1">創る楽しさを、</span>
+            <span data-hero="3" data-i18n="hero.title2"><em class="grad-text">伝わるチカラ</em>に。</span>
+          </h1>
+          <p class="hero__name" data-hero="4">DACO<span>／ AI Creator</span></p>
+          <p class="hero__lead" data-hero="5" data-i18n="hero.lead">
+            生成AIを活用して、SNS・広告・IP展開に使える<br class="pc-only">
+            ビジュアルと映像企画を制作しています。
+          </p>
+          <div class="hero__actions" data-hero="6">
+            <a href="#works" class="btn btn--primary"><span data-i18n="hero.btnWorks">作品を見る</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <a href="#contact" class="btn btn--ghost" data-i18n="hero.btnContact">お仕事のご相談</a>
+          </div>
+        </div>
       </div>
-      <div class="hero__actions reveal d6">
-        <a href="#works" class="btn btn--primary"><span data-i18n="hero.btnWorks">作品を見る</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14m0 0l-6-6m6 6l6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-        <a href="#contact" class="btn btn--ghost" data-i18n="hero.btnContact">お仕事のご相談</a>
+
+      <!-- 床・フットライト -->
+      <div class="stage__floor" aria-hidden="true"><div class="stage__footlights"></div></div>
+
+      <!-- カーテン（WebGLで描画。使えない環境ではCSSのカーテン） -->
+      <canvas class="stage__curtain" id="curtainGL" aria-hidden="true"></canvas>
+      <div class="stage__curtain-css" aria-hidden="true"><i></i><i></i></div>
+
+      <!-- 上部の幕（バランス）と電飾サイン -->
+      <div class="stage__valance" aria-hidden="true">
+        <div class="stage__sign"><span>DACO</span><small>AI CREATIVE THEATER</small></div>
       </div>
+
+      <!-- DACO -->
+      <div class="actor" id="actor" aria-hidden="true">
+        <div class="actor__spot"></div>
+        <div class="actor__body">
+          <img class="actor__stand" src="assets/img/daco_stand.webp" alt="" width="337" height="577">
+          <img class="actor__peace" src="assets/img/daco_peace.webp" alt="" width="720" height="811">
+        </div>
+      </div>
+      <canvas class="stage__fx" id="stageFx" aria-hidden="true"></canvas>
+      <div class="actor__bubble" id="actorBubble" aria-hidden="true"></div>
+
+      <div class="stage__hint" id="stageHint" aria-hidden="true">
+        <span class="stage__hint-icon"><i></i></span>
+        <span data-i18n="stage.hint">SCROLL TO OPEN</span>
+      </div>
+      <a class="stage__skip" href="#works" data-i18n="stage.skip">スキップ ↓</a>
     </div>
-    <div class="hero__mascot" aria-hidden="true"><img src="assets/img/daco_mascot.jpg" alt=""></div>
-    <div class="hero__scroll" aria-hidden="true"><span></span>SCROLL</div>
   </section>
 
-  <!-- ======= マーキー ======= -->
-  <div class="marquee" aria-hidden="true">
-    <div class="marquee__track">
-      <span>AI IMAGE ✦ AI VIDEO ✦ CHARACTER DESIGN ✦ AI MUSIC ✦ PROMPT DESIGN ✦ STORY TELLING ✦ SHORT MOVIE ✦&nbsp;</span>
-      <span>AI IMAGE ✦ AI VIDEO ✦ CHARACTER DESIGN ✦ AI MUSIC ✦ PROMPT DESIGN ✦ STORY TELLING ✦ SHORT MOVIE ✦&nbsp;</span>
-    </div>
+  <!-- ======= SHOWREEL（作品サムネイルのフィルムストリップ） ======= -->
+  <div class="reel" aria-label="Showreel">
+    <div class="reel__track" id="reelTrack"></div>
+  </div>
+
+  <!-- ======= HIGHLIGHTS ======= -->
+  <div class="highlights" id="highlights">
+    <div class="hl reveal"><b class="hl__num">🏆</b><span data-i18n="hl.mvp">AI動画コンテスト<br>MVP受賞</span></div>
+    <div class="hl reveal d2"><b class="hl__num">🏅</b><span data-i18n="hl.wfaia">WFAIA<br>ファイナリスト選出</span></div>
+    <div class="hl reveal d3"><b class="hl__num" data-count="works">5</b><span data-i18n="hl.works">掲載作品</span></div>
+    <div class="hl reveal d4"><b class="hl__num" data-count="tools">11</b><span data-i18n="hl.tools">使いこなすAIツール</span></div>
   </div>
 
   <!-- ======= 01 SELECTED WORKS ======= -->
@@ -323,6 +370,8 @@
 </main>
 
 <footer class="footer">
+  <p class="footer__thanks" data-i18n="footer.thanks">THANK YOU FOR WATCHING</p>
+  <img class="footer__daco" src="assets/img/daco_peace.webp" alt="" aria-hidden="true" loading="lazy" width="720" height="811">
   <img class="footer__mark" src="assets/img/daco_logo.png" alt="DACO">
   <p class="footer__logo">DACO<span class="grad-text" id="dot">.</span></p>
   <p class="footer__note">AI CREATIVE PORTFOLIO — Enjoy Create! Fun comes first.</p>
@@ -334,6 +383,7 @@
 <script src="assets/data/works.js"></script>
 <script src="assets/js/works.js"></script>
 <script src="assets/js/main.js"></script>
+<script src="assets/js/stage.js"></script>
 <script src="assets/js/edit-config.js"></script>
 <script src="assets/js/edit.js"></script>
 </body>
