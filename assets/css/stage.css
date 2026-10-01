@@ -46,7 +46,6 @@
   position: absolute; inset: -4% -4% var(--floor);
   display: grid; align-content: center; gap: 14px;
   opacity: calc(0.08 + var(--open, 0) * 0.12);
-  filter: saturate(1.15);
   mask-image: radial-gradient(ellipse 75% 70% at 50% 45%, #000 25%, transparent 78%);
   -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 45%, #000 25%, transparent 78%);
   transform: perspective(900px) rotateX(8deg) scale(1.05);
@@ -89,21 +88,24 @@
 }
 
 /* スポットライトの光線 */
-.stage__beams { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen; }
+.stage__beams { position: absolute; inset: 0; pointer-events: none; }
 .stage__beams i {
   position: absolute; top: -10%;
   width: 34vw; height: 120%;
   left: calc(50% - 17vw);
   transform-origin: 50% 0;
   clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%);
-  background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(198, 255, 0, 0.12) 55%, transparent 85%);
-  filter: blur(14px);
-  opacity: calc(var(--open, 0) * 0.55);
+  /* 重いblurを使わず、横方向のグラデーションで光の縁をぼかす */
+  --bc: 255, 255, 255;
+  background: linear-gradient(90deg, transparent 18%, rgba(var(--bc), 0.16) 50%, transparent 82%);
+  -webkit-mask-image: linear-gradient(#000 10%, transparent 88%);
+  mask-image: linear-gradient(#000 10%, transparent 88%);
+  opacity: calc(var(--open, 0) * 0.9);
   animation: beam 9s ease-in-out infinite alternate;
 }
-.stage__beams i:nth-child(1) { --r: 24deg; left: calc(12% - 17vw); background: linear-gradient(rgba(122, 60, 255, 0.7), rgba(122, 60, 255, 0.12) 55%, transparent 85%); }
+.stage__beams i:nth-child(1) { --r: 24deg; left: calc(12% - 17vw); --bc: 150, 100, 255; }
 .stage__beams i:nth-child(2) { --r: -3deg; animation-duration: 11s; }
-.stage__beams i:nth-child(3) { --r: -26deg; left: calc(88% - 17vw); background: linear-gradient(rgba(255, 77, 255, 0.6), rgba(255, 77, 255, 0.1) 55%, transparent 85%); animation-duration: 13s; }
+.stage__beams i:nth-child(3) { --r: -26deg; left: calc(88% - 17vw); --bc: 255, 110, 255; animation-duration: 13s; }
 @keyframes beam {
   from { transform: rotate(calc(var(--r) - 7deg)); }
   to   { transform: rotate(calc(var(--r) + 7deg)); }
@@ -233,6 +235,32 @@
   will-change: transform;
 }
 .actor__body { position: relative; transform-origin: 50% 100%; will-change: transform; }
+.actor.is-final .actor__body { animation: floaty 3.6s ease-in-out infinite; }
+@keyframes floaty { 50% { translate: 0 -7px; } }
+
+/* ---------- 観客のハムスター ---------- */
+.crowd { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+.ham {
+  position: absolute;
+  bottom: calc(var(--floor) * 0.16);
+  height: var(--hh, min(14vh, 130px));
+  width: auto;
+  transform: translateX(-50%) translateY(calc((1 - var(--rise, 0)) * 62%));
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.5));
+  will-change: transform;
+}
+.ham--chip { left: 17%; }
+.ham--red  { left: 25.5%; height: calc(var(--hh, min(14vh, 130px)) * 0.94); }
+.ham--teal { left: 33.5%; height: calc(var(--hh, min(14vh, 130px)) * 1.06); }
+.crowd.is-cheer .ham { animation: hop 1.5s cubic-bezier(0.3, 0, 0.3, 1) infinite; }
+.crowd.is-cheer .ham--red  { animation-delay: 0.18s; }
+.crowd.is-cheer .ham--teal { animation-delay: 0.36s; }
+@keyframes hop {
+  0%, 40%, 100% { translate: 0 0; }
+  18% { translate: 0 -22%; }
+  30% { translate: 0 2%; }
+}
 .actor__body img { width: 100%; height: auto; filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.55)); }
 .actor__peace {
   position: absolute; left: 50%; bottom: 0;
@@ -431,7 +459,7 @@ html[lang="en"] .hero__title { font-size: clamp(1.7rem, min(4.1vw, 6vh), 3.5rem)
   margin-bottom: 8px;
 }
 .hl__num[data-count] {
-  background: var(--grad);
+  background: var(--grad-bright);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -494,7 +522,12 @@ main, .footer { position: relative; z-index: 1; }
   text-shadow: 0 0 12px rgba(198, 255, 0, 0.6);
   margin-bottom: 14px;
 }
-.footer__daco { width: 120px; height: auto; margin: 0 auto 6px; animation: bow 3.2s ease-in-out infinite; transform-origin: 50% 100%; }
+.footer__cast { display: flex; justify-content: center; align-items: flex-end; gap: 6px; margin: 0 auto 10px; }
+.footer__cast img { height: 64px; width: auto; animation: bow 3.2s ease-in-out infinite; transform-origin: 50% 100%; }
+.footer__cast img:nth-child(1) { animation-delay: 0.15s; }
+.footer__cast img:nth-child(3) { animation-delay: 0.3s; }
+.footer__cast img:nth-child(4) { animation-delay: 0.45s; }
+.footer__cast .footer__daco { height: 120px; }
 @keyframes bow {
   0%, 55%, 100% { transform: rotate(0) translateY(0); }
   65%, 80% { transform: rotate(-4deg) translateY(4px) scaleY(0.96); }
@@ -506,6 +539,16 @@ main, .footer { position: relative; z-index: 1; }
 }
 @media (max-width: 760px), (max-aspect-ratio: 4/5) {
   .stage { --floor: 13svh; height: 290svh; }
+  .stage__wall { opacity: calc(0.05 + var(--open, 0) * 0.07); }
+  .stage__wall-row:nth-child(3) { display: none; }
+  .stage__back::after {
+    background: linear-gradient(rgba(5, 4, 11, 0.88) 0, rgba(5, 4, 11, 0.7) 55%, transparent 78%);
+  }
+  .crowd { z-index: 6; }          /* スマホはDACOの手前に（隠れないように） */
+  .ham { --hh: 8svh; bottom: calc(var(--floor) * 0.08); }
+  .ham--chip { left: 10%; }
+  .ham--red  { left: 77%; }
+  .ham--teal { left: 91%; }
   .hero {
     left: 20px; right: 20px; width: auto;
     top: calc(var(--valance) + 1.5vh);
@@ -551,6 +594,6 @@ main, .footer { position: relative; z-index: 1; }
 @media (prefers-reduced-motion: reduce) {
   .stage { height: auto; }
   .stage__pin { position: relative; height: 100svh; min-height: 620px; }
-  .stage__wall-row, .reel__track, .stage__beams i, .stage__sign::before, .stage__sign span, .footer__daco { animation: none; }
+  .stage__wall-row, .reel__track, .stage__beams i, .stage__sign::before, .stage__sign span, .footer__cast img, .crowd .ham, .actor__body { animation: none !important; }
   .work.reveal .work__media { clip-path: none; transition: none; }
 }

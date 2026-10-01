@@ -19,6 +19,8 @@
   --c3: #ff4dff;   /* neon pink (accent)      */
   --navy: #0a0e2b; /* hair base               */
   --grad: linear-gradient(100deg, var(--c2), var(--c1) 55%, var(--c3));
+  /* 文字用：暗い背景でも読めるよう明るめのグラデーション */
+  --grad-bright: linear-gradient(100deg, #d6ff3d, #b08cff 52%, #ff86ff);
   --font-jp: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
   --font-en: "Syne", "Space Grotesk", sans-serif;
   --font-mono: "Space Grotesk", monospace;
@@ -48,7 +50,7 @@ img { max-width: 100%; display: block; }
 em { font-style: normal; }
 
 .grad-text {
-  background: var(--grad);
+  background: var(--grad-bright);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -108,7 +110,7 @@ em { font-style: normal; }
 }
 .nav__logo-img { width: 48px; height: 48px; opacity: 0.95; }
 .nav__logo-dot {
-  background: var(--grad);
+  background: var(--grad-bright);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -144,22 +146,26 @@ em { font-style: normal; }
   transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s, background 0.25s;
 }
 .btn--primary {
-  background: var(--grad);
-  color: #0a0a12;
-  box-shadow: 0 4px 28px rgba(198, 255, 0, 0.28);
+  /* 視認性重視：ライム単色＋濃紺の文字（どの背景でもコントラストが出る） */
+  background: var(--c2);
+  color: #0a0e2b;
+  font-weight: 900;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35) inset, 0 6px 26px rgba(198, 255, 0, 0.38);
 }
 .btn--primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 40px rgba(198, 255, 0, 0.45);
+  background: #d8ff4d;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5) inset, 0 10px 40px rgba(198, 255, 0, 0.55);
 }
 .btn--ghost {
-  border: 1px solid var(--border-strong);
-  color: var(--text);
-  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  background: rgba(12, 9, 28, 0.78);
 }
 .btn--ghost:hover {
   transform: translateY(-3px);
   border-color: var(--c2);
+  color: var(--c2);
   box-shadow: 0 0 28px rgba(198, 255, 0, 0.25);
 }
 .btn--lg { padding: 18px 42px; font-size: 1.02rem; }
@@ -199,7 +205,7 @@ em { font-style: normal; }
   font-family: var(--font-en); font-weight: 800;
   font-size: clamp(2.6rem, 6vw, 4rem);
   line-height: 1;
-  background: var(--grad);
+  background: var(--grad-bright);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
   opacity: 0.9;
@@ -303,7 +309,7 @@ em { font-style: normal; }
 .charsec__copy .charsec__concept {
   font-family: var(--font-en); font-weight: 700;
   font-size: 0.85rem; letter-spacing: 0.3em;
-  background: var(--grad);
+  background: var(--grad-bright);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 14px;
@@ -446,7 +452,7 @@ em { font-style: normal; }
   display: block;
   font-family: var(--font-en); font-weight: 700;
   font-size: 0.74rem; letter-spacing: 0.32em;
-  background: var(--grad);
+  background: var(--grad-bright);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 6px;
@@ -462,7 +468,7 @@ em { font-style: normal; }
 .work__points li::before {
   content: "◆"; position: absolute; left: 0; top: 1px;
   font-size: 0.6rem;
-  background: var(--grad);
+  background: var(--grad-bright);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -760,7 +766,7 @@ em { font-style: normal; }
 .flow__num {
   font-family: var(--font-en); font-weight: 700;
   font-size: 0.68rem; letter-spacing: 0.22em;
-  background: var(--grad);
+  background: var(--grad-bright);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
 }

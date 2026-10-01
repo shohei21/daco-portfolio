@@ -27,6 +27,7 @@
   const actorBody = $('.actor__body', actor);
   const bubble = $('#actorBubble');
   const glCanvas = $('#curtainGL');
+  const crowd = $('#crowd');
   const fxCanvas = $('#stageFx');
   const valance = $('.stage__valance', stage);
   const floorEl = $('.stage__floor', stage);
@@ -88,7 +89,7 @@
     const seen = new Set();
     const uniq = thumbs.filter((t) => (seen.has(t.id) ? false : seen.add(t.id)));
     box.innerHTML = POSTER_LAYOUT.slice(0, uniq.length)
-      .map((L, i) => `<figure class="poster" style="--w:${L.w * 100}vw;left:${L.x * 100}%;top:${L.y * 100}%;filter:blur(${((1 - L.d) * 2.2).toFixed(1)}px) brightness(${0.55 + L.d * 0.35})"><img src="${esc(uniq[i].src)}" alt="" loading="lazy" decoding="async"><figcaption>${esc(uniq[i].title)}</figcaption></figure>`)
+      .map((L, i) => `<figure class="poster" style="--w:${L.w * 100}vw;left:${L.x * 100}%;top:${L.y * 100}%;filter:brightness(${(0.55 + L.d * 0.35).toFixed(2)})"><img src="${esc(uniq[i].src)}" alt="" loading="lazy" decoding="async"><figcaption>${esc(uniq[i].title)}</figcaption></figure>`)
       .join('');
     posters = Array.from(box.children).map((el, i) => ({ el, L: POSTER_LAYOUT[i] }));
   }
@@ -281,15 +282,18 @@ void main(){
     }
     M.yF = H + 4 - M.h;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, portrait ? 1.5 : 1.75);
+    // 布は柔らかい質感なので解像度を抑えても見た目はほぼ同じ → GPU負荷を大きく削減
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
     M.dpr = dpr;
+    M.fxDpr = Math.min(window.devicePixelRatio || 1, portrait ? 1 : 1.5);
+    needGL = true;
     if (gl) {
       glCanvas.width = Math.round(W * dpr);
       glCanvas.height = Math.round(H * dpr);
       gl.viewport(0, 0, glCanvas.width, glCanvas.height);
     }
-    fxCanvas.width = Math.round(W * dpr);
-    fxCanvas.height = Math.round(H * dpr);
+    fxCanvas.width = Math.round(W * M.fxDpr);
+    fxCanvas.height = Math.round(H * M.fxDpr);
     bubbleW = 0;
   }
 
@@ -317,6 +321,7 @@ void main(){
      ------------------------------------------------------------ */
   const fx = fxCanvas.getContext('2d');
   const parts = [];
+  let fxDirty = false;
   const COLORS = ['#c6ff00', '#7a3cff', '#ff4dff', '#ffffff', '#b26dff'];
   function burstSparkles(x, y, n) {
     for (let i = 0; i < n; i++) {
@@ -328,14 +333,16 @@ void main(){
     for (let i = 0; i < n; i++) {
       const fromLeft = i % 2 === 0;
       parts.push({ k: 'c', x: fromLeft ? M.W * (0.08 + Math.random() * 0.1) : M.W * (0.82 + Math.random() * 0.1), y: M.H * (M.top + Math.random() * 0.05),
-        vx: (fromLeft ? 1 : -1) * (2 + Math.random() * 7), vy: -3 - Math.random() * 6, life: 1, decay: 0.004 + Math.random() * 0.004,
+        vx: (fromLeft ? 1 : -1) * (2 + Math.random() * 7), vy: -3 - Math.random() * 6, life: 1, decay: 0.007 + Math.random() * 0.005,
         w: 6 + Math.random() * 6, h: 3 + Math.random() * 4, c: COLORS[i % COLORS.length], rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3 });
     }
   }
   function drawFx() {
-    const d = M.dpr;
+    const d = M.fxDpr;
+    if (!parts.length && !fxDirty) return;
     fx.setTransform(1, 0, 0, 1, 0, 0);
     fx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+    fxDirty = parts.length > 0;
     if (!parts.length) return;
     fx.setTransform(d, 0, 0, d, 0, 0);
     for (let i = parts.length - 1; i >= 0; i--) {
@@ -369,7 +376,7 @@ void main(){
      スクロール → 演出
      ------------------------------------------------------------ */
   let pRaw = 0, p = 0, pPrev = 0, sway = 0, time = 0, travelled = 0, lastX = null;
-  let firedConfetti = false, firedSwap = false;
+  let firedConfetti = false, firedSwap = false, needGL = true, lastGL = -1;
   let mouseX = 0, mouseY = 0, mx = 0, my = 0;
 
   function readScroll() {
@@ -435,11 +442,8 @@ void main(){
       rot = Math.sin(Math.PI * c) * -10;
       peace = seg(c, 0.38, 0.62);
     }
-    if (c >= 1) {
-      // 最終ポーズでのゆらぎ
-      y += Math.sin(time * 1.6) * 6;
-      rot = Math.sin(time * 1.1) * 1.5;
-    }
+    // 最終ポーズのゆらぎはCSSアニメーションに任せる（JSの毎フレーム処理を止められる）
+    actor.classList.toggle('is-final', c >= 1);
     const x = cx - M.aw / 2;
     actor.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0) scale(${s.toFixed(4)})`;
     actorBody.style.transform = `rotate(${rot.toFixed(2)}deg)`;
@@ -459,7 +463,7 @@ void main(){
       burstSparkles(cx, y + M.h - M.h * s * 0.55, 46);
     }
     if (c < 0.2) firedSwap = false;
-    if (!firedConfetti && b > 0.97 && vel >= 0) { firedConfetti = true; confetti(M.portrait ? 70 : 130); }
+    if (!firedConfetti && b > 0.97 && vel >= 0) { firedConfetti = true; confetti(M.portrait ? 50 : 110); }
     if (b < 0.6) firedConfetti = false;
 
     // ---- 吹き出し
@@ -480,12 +484,17 @@ void main(){
       bubble.style.translate = `${bx.toFixed(1)}px ${by.toFixed(1)}px`;
     }
 
+    // ---- 観客のハムスター：幕が開くにつれて立ち上がり、開ききったら跳ねて喜ぶ
+    pin.style.setProperty('--rise', easeOut(seg(p, 0.08, 0.5)).toFixed(3));
+    crowd.classList.toggle('is-cheer', b > 0.95);
+
     // ---- 奥のコピー（順番に浮かび上がる）
     heroItems.forEach((el, i) => {
       const v = easeOut(seg(q, i * 0.075, i * 0.075 + 0.38));
+      if (el._v === v) return;   // 変化が無ければスタイルを書き換えない
+      el._v = v;
       el.style.opacity = v.toFixed(3);
       el.style.transform = v >= 1 ? 'none' : `translate3d(0,${((1 - v) * 34).toFixed(1)}px,0)`;
-      el.style.filter = v >= 1 ? 'none' : `blur(${((1 - v) * 8).toFixed(1)}px)`;
       el.style.pointerEvents = v > 0.5 ? 'auto' : 'none';
     });
 
@@ -504,8 +513,12 @@ void main(){
     const inStage = stage.getBoundingClientRect().bottom > H * 0.5;
     nav.classList.toggle('is-hidden', inStage && p < 0.86);
 
-    // ---- カーテン描画
-    if (gl) {
+    // ---- カーテン描画（変化がある時だけ。幕が開ききって止まっている間は描かない）
+    const moving = Math.abs(vel) > 1e-5 || Math.abs(sway) > 0.002;
+    const glDue = needGL || moving || (open < 0.999 && time - lastGL > 1 / 30);
+    if (gl && glDue) {
+      needGL = false;
+      lastGL = time;
       gl.uniform2f(U.uRes, glCanvas.width, glCanvas.height);
       gl.uniform1f(U.uTime, time);
       gl.uniform1f(U.uOpen, open);
@@ -532,16 +545,24 @@ void main(){
      ループ（舞台が見えている間だけ回す）
      ------------------------------------------------------------ */
   let visible = true, raf = 0, last = performance.now();
+  let idleFor = 0;
   function frame(now) {
     raf = 0;
     const dt = Math.min(0.05, (now - last) / 1000);
-    last = now;
-    time += dt;
     readScroll();
-    // 慣性をつけて追従（スマホでもヌルっと）
-    p = Math.abs(pRaw - p) < 0.0004 ? pRaw : mix(p, pRaw, 1 - Math.pow(0.0015, dt));
-    render();
-    if (visible || parts.length) raf = requestAnimationFrame(frame);
+    const settled = Math.abs(pRaw - p) < 0.0004 && !parts.length && Math.abs(mouseX - mx) + Math.abs(mouseY - my) < 0.002 && Math.abs(sway) < 0.002;
+    idleFor = settled ? idleFor + dt : 0;
+    // 止まっている間は30fpsに間引き、幕が開いた後に完全に止まったらループ自体を止める
+    const throttle = idleFor > 0.4 && now - last < 30;
+    if (!throttle) {
+      last = now;
+      time += dt;
+      // 慣性をつけて追従（スマホでもヌルっと）
+      p = Math.abs(pRaw - p) < 0.0004 ? pRaw : mix(p, pRaw, 1 - Math.pow(0.0015, dt));
+      render();
+    }
+    const parked = idleFor > 0.6 && p > 0.76;
+    if ((visible && !parked) || parts.length) raf = requestAnimationFrame(frame);
   }
   const start = () => { if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } };
 
@@ -560,6 +581,7 @@ void main(){
     render();
     new IntersectionObserver((ents) => {
       visible = ents[0].isIntersecting;
+      if (!visible) { parts.length = 0; fxDirty = true; drawFx(); }   // 見えない所では演出を止める
       if (visible) start();
       else nav.classList.remove('is-hidden');
     }).observe(stage);
@@ -571,6 +593,7 @@ void main(){
       window.addEventListener('mousemove', (e) => {
         mouseX = e.clientX / window.innerWidth - 0.5;
         mouseY = e.clientY / window.innerHeight - 0.5;
+        if (visible) start();
       }, { passive: true });
     }
     // 画像の読み込み後にレイアウトを取り直す（ヒーローの高さが変わるため）
